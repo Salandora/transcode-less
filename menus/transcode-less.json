@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle transcode-less",
+        "command": "transcode-less:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "transcode-less",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "transcode-less:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "transcode-less",
+  "main": "./lib/transcode-less",
+  "version": "0.0.1",
+  "description": "Simple and configurable less to css compiler",
+  "author": {
+    "name": "Luc Chante",
+    "email": "luc.chante@gmail.com",
+    "url": "https://plus.google.com/+LucChante"
+  },
+  "keywords": [
+  ],
+  "activationCommands": {
+    "atom-workspace": "transcode-less:toggle"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://luc-data.no-ip.org/browse/tools/transcode-less.git"
+  },
+  "bugs": {
+    "email": "luc.chante@gmail.com"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+  }
+}
