@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "outDir": "../lib",
+        "sourceMap": false,
+        "jsx": "react"
+    },
+    "dts": {
+        "name": "transcode-less"
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "./**/*.tsx",
+        "../typings/index.d.ts",
+        "!node_modules/**/*.ts",
+        "!node_modules/**/*.tsx"
+    ],
+    "files": [
+        "./_references.d.ts",
+        "./transcode-less.ts",
+        "../typings/index.d.ts"
+    ],
+    "exclude": [],
+    "atom": {
+        "rewriteTsconfig": true,
+        "formatOnSave": false
+    }
+}

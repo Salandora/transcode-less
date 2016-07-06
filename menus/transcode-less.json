@@ -2,8 +2,8 @@
   "context-menu": {
     "atom-text-editor": [
       {
-        "label": "Toggle transcode-less",
-        "command": "transcode-less:toggle"
+        "label": "Reload transcode-less",
+        "command": "transcode-less:reload"
       }
     ]
   },
@@ -15,8 +15,8 @@
           "label": "transcode-less",
           "submenu": [
             {
-              "label": "Toggle",
-              "command": "transcode-less:toggle"
+              "label": "Reload",
+              "command": "transcode-less:reload"
             }
           ]
         }
