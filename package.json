@@ -21,6 +21,9 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
+  "activationHooks": [
+    "language-less:grammar-used"
+  ],
   "dependencies": {
     "event-kit": "^2.0.0",
     "less": "^2.7.1"
