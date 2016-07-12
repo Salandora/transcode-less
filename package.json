@@ -29,5 +29,6 @@
     "less": "^2.7.1"
   },
   "devDependencies": {
+    "typings": "0.7.9"
   }
 }
