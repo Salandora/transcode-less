@@ -1,7 +1,7 @@
 import {CompositeDisposable} from "event-kit";
 import less = require("less");
 
-import DisposableCollection = require("./utils");
+import {DisposableCollection} from "./utils";
 
 module TranscodeLess {
   /**
@@ -24,12 +24,34 @@ module TranscodeLess {
       var grammar = editor.getGrammar();
       if (grammar.packageName == "language-less") {
         this.add(editor.getPath(), editor.onDidSave(this.onLessFileSaved.bind(this)));
-        console.log(this);
       }
     }
 
     private onLessFileSaved(event: { path: string }) {
+      var editor = atom.workspace.getActiveTextEditor();
+      // shouldn't be necessary
+      if (editor.getPath() != event.path) {
+        return;
+      }
 
+      var dir = event.path.split("/").slice(0, -1).join("/");
+      var options: Less.Options = {
+        filename: editor.getTitle(),
+        plugins: []
+      };
+      options["paths"] = [ dir ];
+
+      less.render(editor.getText(), options).then(
+        this.onLessRenderSuccess.bind(this),
+        this.onLessRenderError.bind(this));
+    }
+
+    private onLessRenderSuccess(output: Less.RenderOutput) {
+      console.log("onLessRenderSuccess", output);
+    }
+
+    private onLessRenderError(error: Less.RenderError) {
+      console.log("onLessRenderError", error);
     }
   }
 

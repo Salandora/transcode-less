@@ -6,6 +6,7 @@
     "event-kit": "registry:dt/event-kit#1.2.0+20160317120654",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
     "less": "registry:dt/less#0.0.0+20160608105036",
+    "node": "registry:dt/node#6.0.0+20160709114037",
     "pathwatcher": "registry:dt/pathwatcher#0.0.0+20160317120654",
     "q": "registry:dt/q#0.0.0+20160613154756",
     "space-pen": "registry:dt/space-pen#0.0.0+20160316155526",
