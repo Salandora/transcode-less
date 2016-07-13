@@ -1,5 +1,7 @@
 import {CompositeDisposable} from "event-kit";
+import fs = require("fs");
 import less = require("less");
+import path = require("path");
 
 import {DisposableCollection} from "./utils";
 
@@ -23,6 +25,12 @@ module TranscodeLess {
     private onTextEditorOpen(editor: AtomCore.IEditor) {
       var grammar = editor.getGrammar();
       if (grammar.packageName == "language-less") {
+        var dir = path.dirname(editor.getPath());
+        // looking for the lessconfig.json file up to the project root directory
+        while (atom.project.contains(dir) && !fs.existsSync(path.join(dir, "lessconfig.json"))) {
+          dir = path.dirname(dir);
+        }
+
         this.add(editor.getPath(), editor.onDidSave(this.onLessFileSaved.bind(this)));
       }
     }
@@ -34,7 +42,7 @@ module TranscodeLess {
         return;
       }
 
-      var dir = event.path.split("/").slice(0, -1).join("/");
+      var dir = path.dirname(event.path);
       var options: Less.Options = {
         filename: editor.getTitle(),
         plugins: []
