@@ -22,6 +22,9 @@ module TranscodeLess {
       this.add("_global", atom.workspace.observeTextEditors(this.onTextEditorOpen.bind(this)));
     }
 
+    /**
+     * Add an observer on less opened file
+     */
     private onTextEditorOpen(editor: AtomCore.IEditor) {
       var grammar = editor.getGrammar();
       if (grammar.packageName == "language-less") {
@@ -35,6 +38,9 @@ module TranscodeLess {
       }
     }
 
+    /**
+     * Listener for less text editor
+     */
     private onLessFileSaved(event: { path: string }) {
       var editor = atom.workspace.getActiveTextEditor();
       // shouldn't be necessary
@@ -54,10 +60,16 @@ module TranscodeLess {
         this.onLessRenderError.bind(this));
     }
 
+    /**
+     * Callback for less render success
+     */
     private onLessRenderSuccess(output: Less.RenderOutput) {
       console.log("onLessRenderSuccess", output);
     }
 
+      /**
+       * Callback for less render fail
+       */
     private onLessRenderError(error: Less.RenderError) {
       console.log("onLessRenderError", error);
     }
