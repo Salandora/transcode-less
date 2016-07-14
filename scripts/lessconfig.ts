@@ -21,10 +21,6 @@ export module LessConfig {
 
       for (var pluginName in this.plugins) {
         var pluginClass = require(pluginName);
-
-        var Fake = function() {
-
-        }
         var plugin = this.getPluginInstance(pluginName, this.plugins[pluginName]);
       }
     }
