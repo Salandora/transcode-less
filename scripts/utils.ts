@@ -18,7 +18,6 @@ export class DisposableCollection extends Disposable implements AtomCore.Disposa
    * If the key already exists, dispose and delete the previous disposable
    */
   public add(key: string, disposable: AtomCore.Disposable) {
-    console.log("DisposableCollection.add()", key);
     this.del(key);
     this.disposables[key] = disposable;
   }

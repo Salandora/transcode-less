@@ -1,40 +1,56 @@
 import {Disposable} from "event-kit";
-import fs = require("fs");
-import less = require("less");
-import path = require("path");
+import Fs = require("fs");
+import Less = require("less");
+import Path = require("path");
 
 import {LessConfig} from "./lessconfig";
 
 export class Transcoder extends Disposable implements AtomCore.Disposable {
 
+  private options: LessConfig.Options;
   private editor: AtomCore.IEditor;
   private editorSaveObserver: AtomCore.Disposable;
 
   constructor(editor: AtomCore.IEditor) {
-    super(() => { console.log(this.editor.getPath(), "transcoder disposed"); this.editorSaveObserver.dispose(); });
+    super(() => this.editorSaveObserver.dispose());
     this.editor = editor;
     this.editorSaveObserver = this.editor.onDidSave(this.transcode.bind(this));
   }
 
-  private render(input: string) {
-    var options: any = {};
-    options.plugins = [];
-    //options.paths = [ path.dirname(this.editor.getPath()) ];
-    less.render(input.toString(), <Less.Options>options)
-      .then((output: Less.RenderOutput) => console.log("success", output))
-      .catch((reason: any) => console.log("error", reason));
-  }
-
-  private onRendered(error: Less.RenderError, output: Less.RenderOutput) {
-    console.log("error", error);
-    console.log("output", output);
-  }
-
   public transcode() {
-    var options = new LessConfig.Options();
+    this.options = LessConfig.Options.getOptionForFile(this.editor.getPath());
 
-    fs.readFile(this.editor.getPath(), null, (err: NodeJS.ErrnoException, data: string) => {
+    Fs.readFile(this.editor.getPath(), null, (error: NodeJS.ErrnoException, data: string) => {
+      console.log("[transcode] TODO: handle error => ", error)
       this.render(data);
     });
+  }
+
+  private render(input: string) {
+    var options: any = this.options.getLessOptions();
+    options.paths = [ Path.dirname(this.editor.getPath()) ];
+    Less.render(input.toString(), <Less.Options>options)
+      .then(this.onCuccess.bind(this))
+      .catch(this.onError.bind(this));
+  }
+
+  private onCuccess(output: Less.RenderOutput) {
+    var outDir = this.options.outDir;
+    var filename = Path.basename(this.editor.getPath()).replace(".less", ".css");
+    if (outDir) {
+      if (!Path.isAbsolute(outDir) && this.options.getFilepath()) {
+        outDir = Path.resolve(Path.dirname(this.options.getFilepath()), outDir);
+      }
+    }
+    else {
+      outDir = Path.dirname(this.editor.getPath());
+    }
+    var outFile = Path.join(outDir, filename);
+
+    Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => console.log("[onCuccess] TODO: handle error => ", error));
+  }
+
+  private onError(reason: any) {
+    console.log("[onError] TODO: handle error => ", reason);
   }
 }

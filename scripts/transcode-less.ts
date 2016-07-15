@@ -1,8 +1,3 @@
-import {CompositeDisposable} from "event-kit";
-import fs = require("fs");
-import less = require("less");
-import path = require("path");
-
 import {DisposableCollection} from "./utils";
 import {Transcoder} from "./transcoder";
 
@@ -22,8 +17,6 @@ module TranscodeLess {
   export var Static = {
     /** Called when the package is activated */
     activate: function(state: State) {
-      console.log("transcode-less:activate", state);
-
       // Add global observer
       observers.add(
         "transcode-less:global",
