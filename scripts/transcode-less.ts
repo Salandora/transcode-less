@@ -1,3 +1,4 @@
+import {TextEditor} from "atom";
 import {DisposableCollection} from "./utils";
 import {Transcoder} from "./transcoder";
 
@@ -20,9 +21,9 @@ module TranscodeLess {
       // Add global observer
       observers.add(
         "transcode-less:global",
-        atom.workspace.observeTextEditors((editor: AtomCore.IEditor) => {
+        (<any>atom.workspace).observeTextEditors((editor: TextEditor) => {
           var grammar = editor.getGrammar();
-          if (grammar.packageName == "language-less") {
+          if ((<any>grammar).packageName == "language-less") {
             observers.add(editor.getPath(), new Transcoder(editor));
           }
         })

@@ -1,17 +1,17 @@
-import {Disposable} from "event-kit";
+import {Disposable, TextEditor} from "atom";
 import Fs = require("fs");
 import Less = require("less");
 import Path = require("path");
 
 import {LessConfig} from "./lessconfig";
 
-export class Transcoder extends Disposable implements AtomCore.Disposable {
+export class Transcoder extends Disposable implements Disposable {
 
   private options: LessConfig.Options;
-  private editor: AtomCore.IEditor;
-  private editorSaveObserver: AtomCore.Disposable;
+  private editor: TextEditor;
+  private editorSaveObserver: Disposable;
 
-  constructor(editor: AtomCore.IEditor) {
+  constructor(editor: TextEditor) {
     super(() => this.editorSaveObserver.dispose());
     this.editor = editor;
     this.editorSaveObserver = this.editor.onDidSave(this.transcode.bind(this));
@@ -21,8 +21,12 @@ export class Transcoder extends Disposable implements AtomCore.Disposable {
     this.options = LessConfig.Options.getOptionForFile(this.editor.getPath());
 
     Fs.readFile(this.editor.getPath(), null, (error: NodeJS.ErrnoException, data: string) => {
-      console.log("[transcode] TODO: handle error => ", error)
-      this.render(data);
+      if (error) {
+        console.error("Error: Transcoder.transcode()", error);
+      }
+      else {
+        this.render(data);
+      }
     });
   }
 
@@ -47,10 +51,10 @@ export class Transcoder extends Disposable implements AtomCore.Disposable {
     }
     var outFile = Path.join(outDir, filename);
 
-    Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => console.log("[onCuccess] TODO: handle error => ", error));
+    Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => { if (error) console.error("Error Transcoder.onCuccess()/writeFile()", error); });
   }
 
   private onError(reason: any) {
-    console.log("[onError] TODO: handle error => ", reason);
+    console.error("Error Transcoder.onError()", reason);
   }
 }

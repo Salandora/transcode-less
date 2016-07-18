@@ -1,11 +1,11 @@
-import {Disposable} from "event-kit";
+import {Disposable} from "atom";
 
 /**
  * Keyed dispoable collection
  */
-export class DisposableCollection extends Disposable implements AtomCore.Disposable {
+export class DisposableCollection extends Disposable implements Disposable {
 
-  private disposables: { [key: string]: AtomCore.Disposable };
+  private disposables: { [key: string]: Disposable };
 
   constructor() {
     super(() => this.clear());
@@ -17,7 +17,7 @@ export class DisposableCollection extends Disposable implements AtomCore.Disposa
    *
    * If the key already exists, dispose and delete the previous disposable
    */
-  public add(key: string, disposable: AtomCore.Disposable) {
+  public add(key: string, disposable: Disposable) {
     this.del(key);
     this.disposables[key] = disposable;
   }
