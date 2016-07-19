@@ -7,51 +7,50 @@ export class NpmUtils {
   private packagePath: string;
 
   constructor() {
-    var paths: string[] = atom.project.getPaths();
-    for (let i = 0; i < paths.length; i++) {
-      var filepath = Path.join(paths[i], "package.json");
-      if (Fs.existsSync(filepath)) {
-        this.packagePath = filepath;
-      }
-    }
+    this.packagePath = atom.packages.getLoadedPackage("transcode-less")["path"];
   }
 
-  public install(packageName: string) {
-    Npm.load(require(this.packagePath), (error: any) => {
+  /** Execute the specified command with the given arguments */
+  private execute(command: string, args: string[] = undefined, callback: (...data: any[]) => void = undefined) {
+    console.debug("execute: " + command, args);
+    Npm.load(this.packagePath, (error: any) => {
       if (error) {
-        console.error("Error: NpmUtils.install()", error);
+        console.error("Error: npm.load()", error);
       }
       else {
-        Npm.commands.install([packageName], (error: any, data: any) => {
+        Npm.prefix = this.packagePath;
+        var cb = (error: any, ...data: any[]) => {
           if (error) {
-            console.error("Error: Npm.commands.install()", error);
+            console.error("Error: npm.commands." + command + "()", error);
           }
           else {
-            console.debug("Debug: Npm.commands.install()", data);
+            callback(data);
           }
-        });
+        };
+        Npm.commands[command](args, cb);
       }
     });
   }
 
-  public search(packageName: string) {
-    console.debug("NpmUtils.search(): loading");
-    Npm.load(require(this.packagePath), (error: any) => {
-      if (error) {
-        console.error("Error: NpmUtils.search()", error);
-      }
-      else {
-        console.debug("NpmUtils.search(): loaded");
-        console.debug("NpmUtils.search(): searching");
-        Npm.commands.search(["less-plugin", packageName], (error: any, data: any) => {
-          if (error) {
-            console.error("Error: Npm.commands.search()", error);
+  /** Install the specified less plugin */
+  public install(packageName: string) {
+    this.execute("install", [packageName], (...data: any[]) => {
+      console.debug("Debug: Npm.commands.install()", data);
+    });
+  }
+
+  /** List installed less plugin */
+  public list() {
+    this.execute("list", [], (data: any, list?: { dependencies?: any[] }) => {
+      var pluginList: string[] = [];
+      if (list && list.dependencies) {
+        for (var name in list.dependencies) {
+          if (name.startsWith("less-plugin-")) {
+            pluginList.push(name);
           }
-          else {
-            console.debug("Debug: Npm.commands.search()", data);
-          }
-        });
+        }
       }
+      console.log("pluginList", pluginList);
     });
   }
 }
