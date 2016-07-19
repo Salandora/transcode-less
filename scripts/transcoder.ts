@@ -17,6 +17,9 @@ export class Transcoder extends Disposable implements Disposable {
     this.editorSaveObserver = this.editor.onDidSave(this.transcode.bind(this));
   }
 
+  /**
+   * Reads asynchronously the file and call render
+   */
   public transcode() {
     this.options = LessConfig.Options.getOptionForFile(this.editor.getPath());
 
@@ -30,6 +33,9 @@ export class Transcoder extends Disposable implements Disposable {
     });
   }
 
+  /**
+   * Render the given input string using less render method
+   */
   private render(input: string) {
     var options: any = this.options.getLessOptions();
     options.paths = [ Path.dirname(this.editor.getPath()) ];
@@ -38,6 +44,9 @@ export class Transcoder extends Disposable implements Disposable {
       .catch(this.onError.bind(this));
   }
 
+  /**
+   * Write the transcoded content into the apropriate output file
+   */
   private onCuccess(output: Less.RenderOutput) {
     var outDir = this.options.outDir;
     var filename = Path.basename(this.editor.getPath()).replace(".less", ".css");
@@ -54,6 +63,9 @@ export class Transcoder extends Disposable implements Disposable {
     Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => { if (error) console.error("Error Transcoder.onCuccess()/writeFile()", error); });
   }
 
+  /**
+   * Handle error when less rendering
+   */
   private onError(reason: any) {
     console.error("Error Transcoder.onError()", reason);
   }
