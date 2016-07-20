@@ -37,11 +37,13 @@ export class Transcoder extends Disposable implements Disposable {
    * Render the given input string using less render method
    */
   private render(input: string) {
-    var options: any = this.options.getLessOptions();
-    options.paths = [ Path.dirname(this.editor.getPath()) ];
-    Less.render(input.toString(), <Less.Options>options)
-      .then(this.onCuccess.bind(this))
-      .catch(this.onError.bind(this));
+    this.options.loadOptions()
+      .then((options: any) => {
+        options.paths = [ Path.dirname(this.editor.getPath()) ];
+        Less.render(input.toString(), <Less.Options>options)
+          .then(this.onCuccess.bind(this))
+          .catch(this.onError.bind(this));
+      });
   }
 
   /**

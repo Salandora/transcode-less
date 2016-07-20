@@ -1,8 +1,13 @@
 import Fs = require("fs");
 import Less = require("less");
 import Path = require("path");
+import NpmUtils = require("./npm-utils");
 
 export module LessConfig {
+
+  interface ILessPlugin {
+    [name: string]: any[]
+  }
 
   /**
    * TranscodeLess options
@@ -43,7 +48,7 @@ export module LessConfig {
     public outDir: string;
 
     /** Plugin list */
-    public plugins: { [name: string]: any[] } = {};
+    public plugins: ILessPlugin = {};
 
     public constructor() {
     }
@@ -52,21 +57,43 @@ export module LessConfig {
       return this.filepath;
     }
 
+    /** Add to `options` loaded plugins and return unloaded */
+    private loadPlugins(plugins: ILessPlugin, options: Less.Options, resolve: (value?: Less.Options) => void) {
+      let uninstalledPlugins: ILessPlugin = {};
+      let uninstalledPluginNames: string[] = [];
+
+      for (let pluginName in plugins) {
+        try {
+          var pluginClass = require(pluginName);
+          var plugin = new pluginClass(plugins[pluginName]);
+          options.plugins.push(plugin);
+        }
+        catch (error) {
+          uninstalledPlugins[pluginName] = plugins[pluginName];
+          uninstalledPluginNames.push(pluginName);
+        }
+      }
+
+      if (uninstalledPluginNames.length > 0) {
+        NpmUtils.install(uninstalledPluginNames)
+          .then(() => this.loadPlugins(uninstalledPlugins, options, resolve));
+      }
+      else {
+        resolve(options);
+      }
+    }
+
     /**
      * Get options object for less rendering
      */
-    public getLessOptions(): Less.Options {
-      var options: Less.Options = {
-        plugins: []
-      };
+    public loadOptions(): Promise<Less.Options> {
+      return new Promise<Less.Options>((resolve: (value?: Less.Options) => void, reject: (reason?: any) => void) => {
+        let options: Less.Options = {
+          plugins: []
+        };
 
-      for (var pluginName in this.plugins) {
-        var pluginClass = require(pluginName);
-        var plugin = new pluginClass(this.plugins[pluginName]);
-        options.plugins.push(plugin);
-      }
-
-      return options;
+        this.loadPlugins(this.plugins, options, resolve);
+      });
     }
   }
 

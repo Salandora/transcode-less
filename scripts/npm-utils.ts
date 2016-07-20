@@ -2,7 +2,7 @@ var Npm = require("npm");
 var Fs = require("fs");
 var Path = require("path");
 
-export class NpmUtils {
+class NpmUtils {
 
   private packagePath: string;
 
@@ -11,7 +11,7 @@ export class NpmUtils {
   }
 
   /** Execute the specified command with the given arguments */
-  private execute(command: string, args: string[] = undefined, callback: (...data: any[]) => void = undefined) {
+  private execute(command: string, args: string[] = undefined, resolve: (...data: any[]) => void) {
     console.debug("execute: " + command, args);
     Npm.load(this.packagePath, (error: any) => {
       if (error) {
@@ -23,8 +23,8 @@ export class NpmUtils {
           if (error) {
             console.error("Error: npm.commands." + command + "()", error);
           }
-          else {
-            callback(data);
+          else if (resolve) {
+            resolve(data);
           }
         };
         Npm.commands[command](args, cb);
@@ -33,24 +33,11 @@ export class NpmUtils {
   }
 
   /** Install the specified less plugin */
-  public install(packageName: string) {
-    this.execute("install", [packageName], (...data: any[]) => {
-      console.debug("Debug: Npm.commands.install()", data);
-    });
-  }
-
-  /** List installed less plugin */
-  public list() {
-    this.execute("list", [], (data: any, list?: { dependencies?: any[] }) => {
-      var pluginList: string[] = [];
-      if (list && list.dependencies) {
-        for (var name in list.dependencies) {
-          if (name.startsWith("less-plugin-")) {
-            pluginList.push(name);
-          }
-        }
-      }
-      console.log("pluginList", pluginList);
+  public install(packageNames: string[]): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.execute("install", packageNames, resolve);
     });
   }
 }
+
+export = new NpmUtils();
