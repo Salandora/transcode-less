@@ -29,7 +29,7 @@ export module LessConfig {
       } while (!Fs.existsSync(configPath) && atom.project.contains(path));
 
       if (Fs.existsSync(configPath)) {
-        var rawOptions: Options = require(configPath);
+        var rawOptions: Options = JSON.parse(Fs.readFileSync(configPath).toString());
         var options = new Options();
         for (let prop in rawOptions) {
           options[prop] = rawOptions[prop];
@@ -58,29 +58,22 @@ export module LessConfig {
     }
 
     /** Add to `options` loaded plugins and return unloaded */
-    private loadPlugins(plugins: ILessPlugin, options: Less.Options, resolve: (value?: Less.Options) => void) {
-      let uninstalledPlugins: ILessPlugin = {};
-      let uninstalledPluginNames: string[] = [];
+    private loadPlugins(options: Less.Options, plugins: string[]): string[] {
+      let unavailablePlugins: string[] = [];
 
-      for (let pluginName in plugins) {
+      for (let index in plugins) {
+        let name = plugins[index];
         try {
-          var pluginClass = require(pluginName);
-          var plugin = new pluginClass(plugins[pluginName]);
+          let pluginClass = require(name);
+          let plugin = new pluginClass(this.plugins[name]);
           options.plugins.push(plugin);
         }
         catch (error) {
-          uninstalledPlugins[pluginName] = plugins[pluginName];
-          uninstalledPluginNames.push(pluginName);
+          unavailablePlugins.push(name);
         }
       }
 
-      if (uninstalledPluginNames.length > 0) {
-        NpmUtils.install(uninstalledPluginNames)
-          .then(() => this.loadPlugins(uninstalledPlugins, options, resolve));
-      }
-      else {
-        resolve(options);
-      }
+      return unavailablePlugins;
     }
 
     /**
@@ -92,7 +85,27 @@ export module LessConfig {
           plugins: []
         };
 
-        this.loadPlugins(this.plugins, options, resolve);
+        let plugins: string[] = [];
+        for (let plugin in this.plugins) {
+          plugins.push(plugin);
+        }
+        let unavailablePlugins: string[] = this.loadPlugins(options, plugins);
+        if (unavailablePlugins.length > 0) {
+          atom.notifications.addInfo("Less plugin install", { detail: unavailablePlugins.join(", "), dismissable: true });
+          NpmUtils.install(unavailablePlugins)
+            .then(() => {
+              this.loadPlugins(options, unavailablePlugins);
+              resolve(options);
+            })
+            .catch(() => {
+              unavailablePlugins = this.loadPlugins(options, unavailablePlugins);
+              atom.notifications.addWarning(unavailablePlugins.join(", ") + " are not available", { dismissable: true });
+              resolve(options);
+            });
+        }
+        else {
+          resolve(options);
+        }
       });
     }
   }

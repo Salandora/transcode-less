@@ -10,11 +10,19 @@ export class Transcoder extends Disposable implements Disposable {
   private options: LessConfig.Options;
   private editor: TextEditor;
   private editorSaveObserver: Disposable;
+  private editorRelativePath: string;
 
   constructor(editor: TextEditor) {
     super(() => this.editorSaveObserver.dispose());
     this.editor = editor;
     this.editorSaveObserver = this.editor.onDidSave(this.transcode.bind(this));
+
+    // Fancy path for notifications
+    this.editorRelativePath = editor.getPath();
+    do {
+      this.editorRelativePath = Path.dirname(this.editorRelativePath);
+    } while (atom.project.contains(Path.dirname(this.editorRelativePath)));
+    this.editorRelativePath = Path.relative(this.editorRelativePath, editor.getPath());
   }
 
   /**
@@ -37,6 +45,7 @@ export class Transcoder extends Disposable implements Disposable {
    * Render the given input string using less render method
    */
   private render(input: string) {
+    atom.notifications.addInfo(this.editorRelativePath, { detail: "Start rendering", dismissable: true });
     this.options.loadOptions()
       .then((options: any) => {
         options.paths = [ Path.dirname(this.editor.getPath()) ];
@@ -50,6 +59,7 @@ export class Transcoder extends Disposable implements Disposable {
    * Write the transcoded content into the apropriate output file
    */
   private onCuccess(output: Less.RenderOutput) {
+    atom.notifications.addInfo(this.editorRelativePath, { detail: "Rendering success", dismissable: true });
     var outDir = this.options.outDir;
     var filename = Path.basename(this.editor.getPath()).replace(".less", ".css");
     if (outDir) {
@@ -69,6 +79,6 @@ export class Transcoder extends Disposable implements Disposable {
    * Handle error when less rendering
    */
   private onError(reason: any) {
-    console.error("Error Transcoder.onError()", reason);
+    atom.notifications.addError(this.editorRelativePath, { detail: "Rendering failed", dismissable: true });
   }
 }

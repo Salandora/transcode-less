@@ -11,7 +11,8 @@ class NpmUtils {
   }
 
   /** Execute the specified command with the given arguments */
-  private execute(command: string, args: string[] = undefined, resolve: (...data: any[]) => void) {
+  private execute(command: string, args: string[] = undefined,
+                  resolve: (...data: any[]) => void, reject: (error: any) => void) {
     console.debug("execute: " + command, args);
     Npm.load(this.packagePath, (error: any) => {
       if (error) {
@@ -22,6 +23,9 @@ class NpmUtils {
         var cb = (error: any, ...data: any[]) => {
           if (error) {
             console.error("Error: npm.commands." + command + "()", error);
+            if (reject) {
+              reject(error);
+            }
           }
           else if (resolve) {
             resolve(data);
@@ -35,7 +39,7 @@ class NpmUtils {
   /** Install the specified less plugin */
   public install(packageNames: string[]): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-      this.execute("install", packageNames, resolve);
+      this.execute("install", packageNames, resolve, reject);
     });
   }
 }
