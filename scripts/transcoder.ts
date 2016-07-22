@@ -2,6 +2,7 @@ import {Disposable, TextEditor} from "atom";
 import Fs = require("fs");
 import Less = require("less");
 import Path = require("path");
+import Utils = require("./utils");
 
 import {LessConfig} from "./lessconfig";
 
@@ -45,7 +46,7 @@ export class Transcoder extends Disposable implements Disposable {
    * Render the given input string using less render method
    */
   private render(input: string) {
-    atom.notifications.addInfo(this.editorRelativePath, { detail: "Start rendering", dismissable: true });
+    Utils.notifications.addInfo(this.editorRelativePath, { detail: "Start rendering", dismissable: true }, 2);
     this.options.loadOptions()
       .then((options: any) => {
         options.paths = [ Path.dirname(this.editor.getPath()) ];
@@ -59,7 +60,7 @@ export class Transcoder extends Disposable implements Disposable {
    * Write the transcoded content into the apropriate output file
    */
   private onCuccess(output: Less.RenderOutput) {
-    atom.notifications.addInfo(this.editorRelativePath, { detail: "Rendering success", dismissable: true });
+    Utils.notifications.addSuccess(this.editorRelativePath, { detail: "Rendering success", dismissable: true }, 2);
     var outDir = this.options.outDir;
     var filename = Path.basename(this.editor.getPath()).replace(".less", ".css");
     if (outDir) {
@@ -79,6 +80,6 @@ export class Transcoder extends Disposable implements Disposable {
    * Handle error when less rendering
    */
   private onError(reason: any) {
-    atom.notifications.addError(this.editorRelativePath, { detail: "Rendering failed", dismissable: true });
+    Utils.notifications.addError(this.editorRelativePath, { detail: "Rendering failed", dismissable: true }, 2);
   }
 }
