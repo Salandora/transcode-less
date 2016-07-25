@@ -1,6 +1,9 @@
 import {TextEditor} from "atom";
+import Fs = require("fs");
+import Path = require("path");
+
 import {DisposableCollection} from "./utils";
-import {Transcoder} from "./transcoder";
+import {FileTranscoder, TextEditorTranscoder} from "./transcoder";
 
 module TranscodeLess {
   /**
@@ -24,10 +27,35 @@ module TranscodeLess {
         (<any>atom.workspace).observeTextEditors((editor: TextEditor) => {
           var grammar = editor.getGrammar();
           if ((<any>grammar).packageName == "language-less") {
-            observers.add(editor.getPath(), new Transcoder(editor));
+            observers.add(editor.getPath(), new TextEditorTranscoder(editor));
           }
         })
       );
+
+      // Add keybindings
+      observers.add(
+        "transcode-less:keybindings",
+        (<any>atom.commands).add("atom-workspace", { "transcode-less:render-all": () => {
+
+          var readdir = (path: string) => (error: any, files: string[]) => {
+            for (let i = 0; i < files.length; i++) {
+              let filepath = Path.join(path, files[i]);
+              var stat = Fs.statSync(filepath);
+              if (stat.isFile() && Path.extname(filepath) == ".less") {
+                let transcoder = new FileTranscoder(filepath);
+                transcoder.transcode();
+              }
+            }
+          };
+
+          var paths = atom.project.getPaths();
+          for (let i = 0; i < paths.length; i++) {
+            var path = paths[i];
+            if (!path.startsWith(".")) {
+
+            }
+          }
+        }}));
     },
 
     /** Called when the package is deactivated */

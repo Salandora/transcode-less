@@ -17,7 +17,7 @@ export module LessConfig {
    */
   export class Options {
 
-    public static getOptionForFile(path: string): Options {
+    public static getOptionFromFile(path: string): Options {
       if (Fs.statSync(path).isFile()) {
         path = Path.dirname(path);
       }
@@ -29,11 +29,19 @@ export module LessConfig {
       } while (!Fs.existsSync(configPath) && atom.project.contains(path));
 
       if (Fs.existsSync(configPath)) {
-        var rawOptions: Options = JSON.parse(Fs.readFileSync(configPath).toString());
+        var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
         var options = new Options();
-        for (let prop in rawOptions) {
-          options[prop] = rawOptions[prop];
+
+        if (rawOptions.outDir) {
+          options.outDir = rawOptions.outDir;
+          delete rawOptions.outDir;
         }
+        if (rawOptions.plugins) {
+          options.plugins = rawOptions.plugins;
+          delete rawOptions.plugins;
+        }
+        options.options = rawOptions;
+
         options.filepath = configPath;
         return options;
       }
@@ -49,6 +57,11 @@ export module LessConfig {
 
     /** Plugin list */
     public plugins: ILessPlugin = {};
+
+    /** Less options */
+    public options: Less.Options = {
+      plugins: []
+    };
 
     public constructor() {
     }
@@ -81,9 +94,22 @@ export module LessConfig {
      */
     public loadOptions(): Promise<Less.Options> {
       return new Promise<Less.Options>((resolve: (value?: Less.Options) => void, reject: (reason?: any) => void) => {
-        let options: Less.Options = {
-          plugins: []
-        };
+        let options: Less.Options = this.options;
+
+        let basepath = Path.dirname(this.filepath);
+        var paths: string[] = (<any>options).paths || [];
+        for (let i = 0; i < paths.length; i++) {
+          if (!Path.isAbsolute(paths[i])) {
+            paths[i] = Path.resolve(basepath, paths[i]);
+          }
+        }
+        (<any>options).paths = paths;
+
+        if (this.outDir) {
+          if (!Path.isAbsolute(this.outDir)) {
+            this.outDir = Path.resolve(basepath, this.outDir);
+          }
+        }
 
         let plugins: string[] = [];
         for (let plugin in this.plugins) {
