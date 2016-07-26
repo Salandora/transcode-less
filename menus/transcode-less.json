@@ -1,26 +1,2 @@
 {
-  "context-menu": {
-    "atom-workspace": [
-      {
-        "label": "Reload transcode-less",
-        "command": "transcode-less:reload"
-      }
-    ]
-  },
-  "menu": [
-    {
-      "label": "Packages",
-      "submenu": [
-        {
-          "label": "transcode-less",
-          "submenu": [
-            {
-              "label": "Reload",
-              "command": "transcode-less:reload"
-            }
-          ]
-        }
-      ]
-    }
-  ]
 }

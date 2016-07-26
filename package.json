@@ -25,11 +25,8 @@
     "language-less:grammar-used"
   ],
   "dependencies": {
-    "event-kit": "^2.0.0",
-    "less": "^2.7.1",
-    "npm": "^3.10.5"
-  },
-  "devDependencies": {
-    "typings": "0.7.9"
+    "event-kit": "*",
+    "less": "*",
+    "npm": "*"
   }
 }
