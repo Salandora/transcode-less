@@ -6,14 +6,11 @@ import NpmUtils = require("./npm-utils");
 export module LessConfig {
 
   interface ILessPlugin {
-    [name: string]: any[]
+    [name: string]: any
   }
 
   /**
    * TranscodeLess options
-   *
-   * plugins: An object keyed by plugin's name, associated to a list arguments
-   *          with is passed to the plugin class' constructor
    */
   export class Options {
 
@@ -28,9 +25,10 @@ export module LessConfig {
         path = Path.dirname(path);
       } while (!Fs.existsSync(configPath) && atom.project.contains(path));
 
+      var options: Options;
       if (Fs.existsSync(configPath)) {
         var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
-        var options = new Options();
+        options = new Options();
 
         if (rawOptions.outDir) {
           options.outDir = rawOptions.outDir;
@@ -38,15 +36,26 @@ export module LessConfig {
         }
         if (rawOptions.plugins) {
           options.plugins = rawOptions.plugins;
-          delete rawOptions.plugins;
         }
+        rawOptions.plugins = [];
         options.options = rawOptions;
 
         options.filepath = configPath;
-        return options;
+      }
+      else {
+        options = DefaultOptions;
       }
 
-      return DefaultOptions;
+      if ((<any>options.options).paths) {
+        let basepath = Path.dirname(path);
+        for (let i = 0; i < (<any>options.options).paths.length; i++) {
+          if (!Path.isAbsolute((<any>options.options).paths[i])) {
+            (<any>options.options).paths[i] = Path.resolve(basepath, (<any>options.options).paths[i]);
+          }
+        }
+      }
+
+      return options;
     }
 
     /** Path to this option file */
@@ -73,7 +82,6 @@ export module LessConfig {
     /** Add to `options` loaded plugins and return unloaded */
     private loadPlugins(options: Less.Options, plugins: string[]): string[] {
       let unavailablePlugins: string[] = [];
-
       for (let index in plugins) {
         let name = plugins[index];
         try {
@@ -82,6 +90,7 @@ export module LessConfig {
           options.plugins.push(plugin);
         }
         catch (error) {
+          console.error(error);
           unavailablePlugins.push(name);
         }
       }
@@ -97,14 +106,6 @@ export module LessConfig {
         let options: Less.Options = this.options;
 
         let basepath = Path.dirname(this.filepath);
-        var paths: string[] = (<any>options).paths || [];
-        for (let i = 0; i < paths.length; i++) {
-          if (!Path.isAbsolute(paths[i])) {
-            paths[i] = Path.resolve(basepath, paths[i]);
-          }
-        }
-        (<any>options).paths = paths;
-
         if (this.outDir) {
           if (!Path.isAbsolute(this.outDir)) {
             this.outDir = Path.resolve(basepath, this.outDir);
@@ -117,7 +118,7 @@ export module LessConfig {
         }
         let unavailablePlugins: string[] = this.loadPlugins(options, plugins);
         if (unavailablePlugins.length > 0) {
-          atom.notifications.addInfo("Less plugin install", { detail: unavailablePlugins.join(", "), dismissable: true });
+          atom.notifications.addInfo("Less plugin install", { detail: unavailablePlugins.join(", ") });
           NpmUtils.install(unavailablePlugins)
             .then(() => {
               this.loadPlugins(options, unavailablePlugins);

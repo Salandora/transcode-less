@@ -47,7 +47,7 @@ export class FileTranscoder extends Transcoder {
           console.error("Error: Transcoder.transcode()", error);
         }
         else {
-          Utils.notifications.addInfo(this.relativeFilepath, { detail: "Start rendering", dismissable: true }, 2);
+          atom.notifications.addInfo(this.relativeFilepath, { detail: "Start rendering" });
           configuration.loadOptions()
             .then((options: Less.Options) => {
               (<any>options).paths = (<any>options).paths || [ Path.dirname(this.filepath) ];
@@ -63,8 +63,7 @@ export class FileTranscoder extends Transcoder {
      * Write the transcoded content into the apropriate output file
      */
     protected onSuccess(options: LessConfig.Options, output: Less.RenderOutput) {
-      console.log("options", options);
-      Utils.notifications.addSuccess(this.relativeFilepath, { detail: "Rendering success", dismissable: true }, 2);
+      atom.notifications.addSuccess(this.relativeFilepath, { detail: "Rendering success" });
       var outDir = Path.dirname(this.filepath);
       if (options.outDir) {
         outDir = options.outDir;
@@ -79,7 +78,7 @@ export class FileTranscoder extends Transcoder {
      * Handle error when less rendering
      */
     protected onError(options: LessConfig.Options, reason: any) {
-      Utils.notifications.addError(this.relativeFilepath, { detail: reason.toString(), dismissable: true });
+      atom.notifications.addError(this.relativeFilepath, { detail: reason.toString(), dismissable: true });
     }
 }
 
