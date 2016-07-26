@@ -1,5 +1,5 @@
 {
   "atom-workspace": {
-    "ctrl-alt-o": "transcode-less:toggle"
+    "ctrl-alt-l": "transcode-less:render-all"
   }
 }
