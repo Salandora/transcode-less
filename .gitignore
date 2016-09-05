@@ -1,9 +1,9 @@
 .DS_Store
-npm-debug.log
-scripts/
-typings/
-typings.json
-node_module/*
-!node_module/event-kit
-!node_module/less
-!node_module/npm
+/npm-debug.log
+/scripts/
+/typings/
+/typings.json
+/node_modules/*
+!/node_modules/event-kit
+!/node_modules/less
+!/node_modules/npm
