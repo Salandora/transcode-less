@@ -1,7 +1,7 @@
 {
   "name": "transcode-less",
   "main": "./lib/transcode-less",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "description": "Simple and configurable less to css compiler",
   "author": {
     "name": "Luc Chante",
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "http://luc-data.no-ip.org/browse/tools/transcode-less.git"
+    "url": "https://luc-data.no-ip.org/browse/tools/transcode-less/"
   },
   "bugs": {
     "email": "luc.chante@gmail.com"
