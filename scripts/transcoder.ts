@@ -44,7 +44,8 @@ export class FileTranscoder extends Transcoder {
 
       Fs.readFile(this.filepath, null, (error: NodeJS.ErrnoException, data: string) => {
         if (error) {
-          console.error("Error: Transcoder.transcode()", error);
+          console.error("FileTranscoder.transcode(): " + error.name, error);
+          atom.notifications.addError(this.relativeFilepath, { detail: error.message });
         }
         else {
           atom.notifications.addInfo(this.relativeFilepath, { detail: "Start rendering" });
@@ -63,15 +64,45 @@ export class FileTranscoder extends Transcoder {
      * Write the transcoded content into the apropriate output file
      */
     protected onSuccess(options: LessConfig.Options, output: Less.RenderOutput) {
-      atom.notifications.addSuccess(this.relativeFilepath, { detail: "Rendering success" });
       var outDir = Path.dirname(this.filepath);
       if (options.outDir) {
         outDir = options.outDir;
       }
+      if (!this.mkdir(outDir)) {
+        atom.notifications.addError(outDir, { detail: "Out directory cannot be create" });
+      }
+
       var filename = Path.basename(this.filepath).replace(".less", ".css");
       var outFile = Path.join(outDir, filename);
 
-      Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => { if (error) console.error("Error Transcoder.onCuccess()/writeFile()", error); });
+      Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => {
+        if (error) {
+          console.error("FileTranscoder.onSuccess(): " + error.name, error);
+          atom.notifications.addError(this.relativeFilepath, { detail: error.message });
+        }
+        else {
+          atom.notifications.addSuccess(this.relativeFilepath, { detail: "Rendering success" });
+        }
+      });
+    }
+
+    /** Make directories recurcively */
+    private mkdir(path: string): boolean {
+      let dirnameStack: string[] = [];
+      let tempDir = path;
+      while (!Fs.existsSync(tempDir) && atom.project.contains(Path.dirname(tempDir))) {
+        dirnameStack.push(Path.basename(tempDir));
+        tempDir = Path.dirname(tempDir);
+      }
+      if (!atom.project.contains(tempDir)) {
+        return false;
+      }
+      for (let i in dirnameStack) {
+        tempDir = Path.join(tempDir, dirnameStack[i]);
+        Fs.mkdirSync(tempDir);
+      }
+
+      return true;
     }
 
     /**
