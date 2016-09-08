@@ -42,8 +42,12 @@ var FileTranscoder = (function (_super) {
         var configuration = lessconfig_1.LessConfig.Options.getOptionFromFile(this.filepath);
         Fs.readFile(this.filepath, null, function (error, data) {
             if (error) {
+<<<<<<< HEAD
+                console.error("Error: Transcoder.transcode()", error);
+=======
                 console.error("FileTranscoder.transcode(): " + error.name, error);
                 atom.notifications.addError(_this.relativeFilepath, { detail: error.message });
+>>>>>>> dev
             }
             else {
                 atom.notifications.addInfo(_this.relativeFilepath, { detail: "Start rendering" });
@@ -61,11 +65,21 @@ var FileTranscoder = (function (_super) {
      * Write the transcoded content into the apropriate output file
      */
     FileTranscoder.prototype.onSuccess = function (options, output) {
+<<<<<<< HEAD
+        atom.notifications.addSuccess(this.relativeFilepath, { detail: "Rendering success" });
+=======
         var _this = this;
+>>>>>>> dev
         var outDir = Path.dirname(this.filepath);
         if (options.outDir) {
             outDir = options.outDir;
         }
+<<<<<<< HEAD
+        var filename = Path.basename(this.filepath).replace(".less", ".css");
+        var outFile = Path.join(outDir, filename);
+        Fs.writeFile(outFile, output.css, function (error) { if (error)
+            console.error("Error Transcoder.onCuccess()/writeFile()", error); });
+=======
         if (!this.mkdir(outDir)) {
             atom.notifications.addError(outDir, { detail: "Out directory cannot be create" });
         }
@@ -97,6 +111,7 @@ var FileTranscoder = (function (_super) {
             Fs.mkdirSync(tempDir);
         }
         return true;
+>>>>>>> dev
     };
     /**
      * Handle error when less rendering
