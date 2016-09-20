@@ -1,0 +1,26 @@
+{
+  "name": "transcode-less",
+  "main": "./lib/transcode-less",
+  "version": "0.2.1",
+  "description": "Less to css transcoder with less plugin support for Atom",
+  "author": "Luc Chante (https://plus.google.com/+LucChante)",
+  "keywords": [
+    "less",
+    "transcode",
+    "less-plugin"
+  ],
+  "repository": "https://github.com/luc-chante/transcode-less",
+  "bugs": "https://github.com/luc-chante/transcode-less/issues/",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "activationHooks": [
+    "language-less:grammar-used"
+  ],
+  "bundledDependencies": {
+    "event-kit": "2.1.0",
+    "less": "2.7.1",
+    "npm": "3.10.6"
+  }
+}
