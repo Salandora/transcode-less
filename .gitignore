@@ -4,7 +4,3 @@
 /typings/
 /typings.json
 /node_modules/*
-!/node_modules/event-kit
-!/node_modules/less
-!/node_modules/npm
-/node_modules/**/test

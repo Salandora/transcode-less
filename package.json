@@ -18,7 +18,7 @@
   "activationHooks": [
     "language-less:grammar-used"
   ],
-  "bundledDependencies": {
+  "dependencies": {
     "event-kit": "2.1.0",
     "less": "2.7.1",
     "npm": "3.10.6"
