@@ -106,13 +106,13 @@ export function transcodeFile(filepath: string, configuration: LessConfig.Option
                 resolve(Path.relative(Path.dirname(filepath), cssFile));
               }
             })
-            .catch((reason: any) => {
+            .catch((error: Less.RenderError) => {
               // Reject with DetailError
               reject(<DetailedError>{
-                name: "TL:READFL",
-                message: reason.toString(),
+                name: "TL:PARSE",
+                message: error.message,
                 detail: `less rendering failed: ${getRelativeFilePath(filepath)}`,
-                stack: "transcoder.ts:93"
+                stack: `${error.filename}:${error.line} ${error.type}`
               });
             });
         }
