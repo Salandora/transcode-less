@@ -1,2 +1,18 @@
 {
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "transcode-less",
+          "submenu": [
+            {
+              "label": "Transcode all",
+              "command": "transcode-less:trasncode-all"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

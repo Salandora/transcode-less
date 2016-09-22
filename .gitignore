@@ -1,6 +1,7 @@
 .DS_Store
 /npm-debug.log
 /scripts/
+/spec/
 /typings/
 /typings.json
 /node_modules/*

@@ -1,13 +1,25 @@
-## 0.0.1 - Initialization
- * Trying to create an Atom package
+## Unreleased
+### Changed
+ * `README` updates
+ * `package.json` updates
+ * "Transcode all" action
 
-## 0.1.0 - 0.1.1 - Lazy less transcode file
- * Just transcode less file into css file
+## [0.2.2 - 0.2.3] - 2016-09-20
+### Changed
+ * Remove bundled dependencies, since it's useless
 
-## 0.1.2 - Less plugins support
- * Less plugins are downladed on demand (via npm)
- * Accept every less options in lessconfig.json file
+## [0.2.1]  - 2016-09-08
+### Fixed
+ * Out directory creation
+
+## [0.2.0] - 2016-09-06
+### First stable release
+ * Published on [Atom](https://atom.io/)
+
+## [0.0.1 - 0.1.3] - 2016-09-06
+### Pre-development of the 1st release
+ * Create an Atom package
+ * Less plugins are downloaded on demand (via [npm](https://www.npmjs.com/package/npm))
+ * Accept every less options in `lessconfig.json` file
  * An output directory can be specified
-
-## 0.1.3 - Dependencies updates and code improvement
- * Move information to github
+ * Move to github
