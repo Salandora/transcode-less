@@ -2,3 +2,5 @@
 /npm-debug.log
 /node_modules/
 /typings/
+/spec/files/*.css
+/spec/*.js

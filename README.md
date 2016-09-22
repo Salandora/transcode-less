@@ -1,8 +1,13 @@
 # transcode-less package
 
-Simple and configurable [less to css](http://lesscss.org/) transcoder
+[Atom](https://atom.io/) package for less to css file transcoding, with [lesscss](http://lesscss.org/) plugins support.
 
-transcode-less package is based upon **lessconfig.json** configuration file.
+transcode-less is simple and configurable. It uses `lessconfig.json` for
+transcoding options. Every *lesscss* options are supported.
+The **plugins** parameter has been improved to dynamically load any
+less plugin (see [less plugin in npm](https://www.npmjs.com/search?q="less-plugin"))
+
+This package is under [CeCILL-C](http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt) license.
 
 ## lessconfig.json
 
@@ -33,7 +38,8 @@ Options:
               "advanced": true
           }
       }
-   }```
+   }
+   ```
 
  * any other lesscss options (except for plugins)
    > See [lesscss doc](http://lesscss.org/usage/#command-line-usage-options)

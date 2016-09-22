@@ -5,8 +5,8 @@
     "noImplicitAny": true,
     "removeComments": false,
     "preserveConstEnums": true,
-    "outDir": "../lib",
-    "sourceMap": true
+    "sourceMap": true,
+    "outDir": "../lib"
   },
   "filesGlob": [
     "./**/*.ts",
