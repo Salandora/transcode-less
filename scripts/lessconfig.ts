@@ -14,7 +14,7 @@ export module LessConfig {
    */
   export class Options {
 
-    public static getOptionFromFile(path: string): Options {
+    public static getOptionForLessFile(path: string): Options {
       if (Fs.statSync(path).isFile()) {
         path = Path.dirname(path);
       }

@@ -1,15 +1,10 @@
 {
-  "globalDevDependencies": {
-    "atom": "registry:env/atom#1.6.0+20160712220130",
-    "emissary": "registry:dt/emissary#0.0.0+20160317120654",
+  "globalDependencies": {
     "es6-shim": "registry:dt/es6-shim#0.31.2+20160602141504",
+    "jasmine": "registry:dt/jasmine#2.2.0+20160621224255",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
     "less": "registry:dt/less#0.0.0+20160608105036",
-    "mixto": "registry:dt/mixto#0.0.0+20160317120654",
     "node": "registry:dt/node#6.0.0+20160720070758",
-    "npm": "registry:dt/npm#0.0.0+20160317120654",
-    "q": "registry:dt/q#0.0.0+20160613154756",
-    "space-pen": "registry:dt/space-pen#0.0.0+20160316155526",
-    "status-bar": "registry:dt/status-bar#0.0.0+20160317120654"
+    "npm": "registry:dt/npm#0.0.0+20160317120654"
   }
 }

@@ -1,12 +1,4 @@
 {
-  "context-menu": {
-    "atom-workspace": [
-      {
-        "label": "Reload transcode-less",
-        "command": "transcode-less:reload"
-      }
-    ]
-  },
   "menu": [
     {
       "label": "Packages",
@@ -15,8 +7,8 @@
           "label": "transcode-less",
           "submenu": [
             {
-              "label": "Reload",
-              "command": "transcode-less:reload"
+              "label": "Transcode all",
+              "command": "transcode-less:trasncode-all"
             }
           ]
         }

@@ -1,5 +1,5 @@
 {
   "atom-workspace": {
-    "ctrl-alt-l": "transcode-less:render-all"
+    "f6": "transcode-less:transcode-all"
   }
 }

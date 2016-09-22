@@ -1,130 +1,179 @@
-import {Disposable, TextEditor} from "atom";
 import Fs = require("fs");
 import Less = require("less");
 import Path = require("path");
-import Utils = require("./utils");
 
 import {LessConfig} from "./lessconfig";
+import {DetailedError} from "./error";
 
-/**  */
-export class Transcoder  {
-  constructor() {
+/** Create `dirpath` recursively */
+function mkdir(dirpath: string): boolean {
+
+  let parts: string[] = [];
+  let path: string = dirpath;
+
+  while (atom.project.contains(Path.dirname(path))) {
+    parts.push(Path.basename(path));
+    path = Path.dirname(path);
   }
 
-  /**
-   * Render the given input string using less render method
-   */
-  protected render(input: string, options: Less.Options): Promise<Less.RenderOutput> {
-    return Less.render(input.toString(), <Less.Options>options);
+  parts.forEach(part => {
+    path = Path.join(path, part);
+    try {
+      Fs.accessSync(path, Fs.F_OK);
+    }
+    catch (exception) {
+      Fs.mkdirSync(path);
+    }
+  });
+
+  try {
+    return Fs.statSync(path).isDirectory();
+  }
+  catch (exception) {
+    return false;
   }
 }
 
-/** Transcoder for file */
-export class FileTranscoder extends Transcoder {
+/** Relativize absolute path from project path */
+function getRelativeFilePath(filepath: string): string {
+  if (!Path.isAbsolute(filepath)) {
+    return filepath;
+  }
+  let relativeFilepath = Path.dirname(filepath);
+  while (atom.project.contains(Path.dirname(relativeFilepath))) {
+    relativeFilepath = Path.dirname(relativeFilepath);
+  }
+  return Path.relative(relativeFilepath, filepath);
+}
 
-    private filepath: string;
-    private relativeFilepath: string;
+/** Render less from the given css string */
+function render(filepath: string, input: string, configuration: LessConfig.Options): Promise<Less.RenderOutput> {
+  return new Promise<Less.RenderOutput> ((resolve, reject) => {
+  configuration.loadOptions()
+    .then((options: Less.Options) => {
+      (<any>options).paths = (<any>options).paths || [ Path.dirname(filepath) ];
+      Less.render(input, options)
+        .then(resolve)
+        .catch(reject);
+    });
+  });
+}
 
-    constructor(filepath: string) {
-      super();
-      this.filepath = filepath;
-      // Fancy path for notifications
-      let relativeFilepath = Path.dirname(filepath);
-      while (atom.project.contains(Path.dirname(relativeFilepath))) {
-        relativeFilepath = Path.dirname(relativeFilepath);
-      }
-      this.relativeFilepath = Path.relative(relativeFilepath, filepath);
+/** Transcode less file into css file */
+export function transcodeFile(filepath: string, configuration: LessConfig.Options = undefined): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    if (configuration == undefined) {
+      configuration = LessConfig.Options.getOptionForLessFile(filepath);
     }
 
-    /**
-     * Reads asynchronously the file and call render
-     */
-    public transcode() {
-      let configuration = LessConfig.Options.getOptionFromFile(this.filepath);
+    let outDir = Path.dirname(filepath);
+    if (configuration.outDir) {
+      outDir = Path.resolve(Path.dirname(configuration.getFilepath()), configuration.outDir);
+    }
+    let cssFile = Path.join(outDir, Path.basename(filepath).replace(/\.less$/, ".css"));
+    let mapFile = Path.join(outDir, Path.basename(filepath).replace(/\.less$/, ".css.map"));
 
-      Fs.readFile(this.filepath, null, (error: NodeJS.ErrnoException, data: string) => {
+    if (!mkdir(outDir)) {
+      reject(<DetailedError>{
+        name: "TL:MKDIR",
+        message: "Out directory cannot be create",
+        detail: `directory: ${getRelativeFilePath(filepath)}`,
+        stack: "transcoder.ts:71"
+      });
+    }
+    else {
+      // Read less file content
+      Fs.readFile(filepath, (error: NodeJS.ErrnoException, data: Buffer) => {
         if (error) {
-          console.error("FileTranscoder.transcode(): " + error.name, error);
-          atom.notifications.addError(this.relativeFilepath, { detail: error.message });
+          // Reject with DetailError
+          reject(<DetailedError>{
+            name: "TL:READFL",
+            message: error.message,
+            detail: `cannot read file: ${getRelativeFilePath(filepath)}`,
+            stack: error.stack
+          });
         }
         else {
-          atom.notifications.addInfo(this.relativeFilepath, { detail: "Start rendering" });
-          configuration.loadOptions()
-            .then((options: Less.Options) => {
-              (<any>options).paths = (<any>options).paths || [ Path.dirname(this.filepath) ];
-              this.render(data.toString(), options)
-                .then(this.onSuccess.bind(this, configuration))
-                .catch(this.onError.bind(this, configuration));
+          // Call less.render()
+          render(filepath, data.toString(), configuration)
+            .then((output: Less.RenderOutput) => {
+              if (output.css.length > 0) {
+                // Write css to file
+                Fs.writeFileSync(cssFile, output.css);
+                if (configuration.options.sourceMap) {
+                  Fs.writeFileSync(mapFile, output.map);
+                }
+                resolve(Path.relative(Path.dirname(filepath), cssFile));
+              }
+            })
+            .catch((reason: any) => {
+              // Reject with DetailError
+              reject(<DetailedError>{
+                name: "TL:READFL",
+                message: reason.toString(),
+                detail: `less rendering failed: ${getRelativeFilePath(filepath)}`,
+                stack: "transcoder.ts:93"
+              });
             });
         }
       });
     }
-
-    /**
-     * Write the transcoded content into the apropriate output file
-     */
-    protected onSuccess(options: LessConfig.Options, output: Less.RenderOutput) {
-      var outDir = Path.dirname(this.filepath);
-      if (options.outDir) {
-        outDir = options.outDir;
-      }
-      if (!this.mkdir(outDir)) {
-        atom.notifications.addError(outDir, { detail: "Out directory cannot be create" });
-      }
-
-      var filename = Path.basename(this.filepath).replace(".less", ".css");
-      var outFile = Path.join(outDir, filename);
-
-      Fs.writeFile(outFile, output.css, (error: NodeJS.ErrnoException) => {
-        if (error) {
-          console.error("FileTranscoder.onSuccess(): " + error.name, error);
-          atom.notifications.addError(this.relativeFilepath, { detail: error.message });
-        }
-        else {
-          atom.notifications.addSuccess(this.relativeFilepath, { detail: "Rendering success" });
-        }
-      });
-    }
-
-    /** Make directories recurcively */
-    private mkdir(path: string): boolean {
-      let dirnameStack: string[] = [];
-      let tempDir = path;
-      while (!Fs.existsSync(tempDir) && atom.project.contains(Path.dirname(tempDir))) {
-        dirnameStack.push(Path.basename(tempDir));
-        tempDir = Path.dirname(tempDir);
-      }
-      if (!atom.project.contains(tempDir)) {
-        return false;
-      }
-      for (let i in dirnameStack) {
-        tempDir = Path.join(tempDir, dirnameStack[i]);
-        Fs.mkdirSync(tempDir);
-      }
-
-      return true;
-    }
-
-    /**
-     * Handle error when less rendering
-     */
-    protected onError(options: LessConfig.Options, reason: any) {
-      atom.notifications.addError(this.relativeFilepath, { detail: reason.toString(), dismissable: true });
-    }
+  });
 }
 
-/** Transcoder for Atom TextEditor */
-export class TextEditorTranscoder extends FileTranscoder implements Disposable {
+/** Transcode all less files in the project */
+export function transcodeAll(configuration: LessConfig.Options = undefined): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
 
-  private editorSaveObserver: Disposable;
+    let paths: string[] = <string[]>(<any>atom.project).getPaths();
+    let path: string;
+    let files: string[] = [];
+    let filepath: string;
+    var stat: Fs.Stats;
 
-  constructor(editor: TextEditor) {
-    super(editor.getPath());
-      this.editorSaveObserver = editor.onDidSave(this.transcode.bind(this));
-  }
+    // looks for lessconfig.json
+    do {
+      path = paths.pop();
+      Fs.readdirSync(path).forEach((file: string) => {
+        filepath = Path.join(path, file);
+        stat = Fs.statSync(filepath);
+        if (stat.isDirectory()) {
+          paths.push(filepath);
+        }
+        else if (stat.isFile() && Path.basename(filepath) == "lessconfig.json") {
+          files.push(filepath);
+        }
+      });
+    } while (paths.length > 0);
 
-  public dispose() {
-    this.editorSaveObserver.dispose();
-    this.editorSaveObserver = undefined;
-  }
+    // looks for *.less files from directories containing a lessconfig.json
+    paths = files.map(file => Path.dirname(file));
+    files = [];
+    do {
+      path = paths.pop();
+      Fs.readdirSync(path).forEach((file: string) => {
+        filepath = Path.join(path, file);
+        stat = Fs.statSync(filepath);
+        if (stat.isDirectory()) {
+          paths.push(filepath);
+        }
+        else if (stat.isFile() && Path.extname(filepath) == ".less") {
+          files.push(filepath);
+        }
+      });
+    } while (paths.length > 0);
+
+    console.log("files ", files);
+
+    if (files.length > 0) {
+      // The first file is transcoded alone, in case of plugin should be installed
+      transcodeFile(files.pop(), configuration)
+        .then((filepath) => {
+          resolve(filepath);
+          files.forEach((file) => {
+            transcodeFile(file, configuration).then(resolve).catch(reject);
+          });
+        });
+    }
+  });
 }
