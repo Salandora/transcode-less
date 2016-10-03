@@ -1,7 +1,7 @@
 {
   "name": "transcode-less",
   "main": "./lib/transcode-less",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Less to css transcoder with less plugin support for Atom",
   "author": "Luc Chante (https://plus.google.com/+LucChante)",
   "keywords": [
