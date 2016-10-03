@@ -1,6 +1,6 @@
 ## Unreleased
 
-## [0.2.5] - 2016-10-03
+## [0.2.5 - 0.2.6] - 2016-10-03
 ### Added
  * New option *rootDir* in `lessconfig.json`
  * Maintain hierarchy for output files
