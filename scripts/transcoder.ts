@@ -3,7 +3,6 @@ import Less = require("less");
 import Path = require("path");
 
 import {LessConfig} from "./lessconfig";
-import {DetailedError} from "./error";
 
 /** Create `dirpath` recursively */
 function mkdir(dirpath: string): boolean {
@@ -63,12 +62,13 @@ function render(filepath: string, input: string, configuration: LessConfig.Optio
 export function transcodeFile(filepath: string, configuration: LessConfig.Options = undefined): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     if (configuration == undefined) {
-      configuration = LessConfig.Options.getOptionForLessFile(filepath);
+      configuration = LessConfig.getOptionForLessFile(filepath);
     }
 
     let outDir = Path.dirname(filepath);
+    outDir = Path.relative(filepath, configuration.rootDir);
     if (configuration.outDir) {
-      outDir = Path.resolve(Path.dirname(configuration.getFilepath()), configuration.outDir);
+      outDir = configuration.outDir;
     }
     let cssFile = Path.join(outDir, Path.basename(filepath).replace(/\.less$/, ".css"));
     let mapFile = Path.join(outDir, Path.basename(filepath).replace(/\.less$/, ".css.map"));

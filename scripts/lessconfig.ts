@@ -9,57 +9,67 @@ export module LessConfig {
     [name: string]: any
   }
 
+  function pop<TValue>(obj: Object, key: string, otherwise: TValue = undefined): TValue {
+    if (obj.hasOwnProperty(key)) {
+      otherwise = <TValue>obj[key];
+      delete obj[key];
+    }
+
+    return otherwise;
+  }
+
+  export function getOptionForLessFile(path: string): Options {
+    if (Fs.statSync(path).isFile()) {
+      path = Path.dirname(path);
+    }
+
+    var configPath: string;
+    do {
+      configPath = Path.join(path, "lessconfig.json");
+      path = Path.dirname(path);
+    } while (!Fs.existsSync(configPath) && atom.project.contains(path));
+
+    var options: Options;
+    if (Fs.existsSync(configPath)) {
+      var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
+      options = new Options();
+
+      options.rootDir = pop<string>(rawOptions, "rootDir");
+      options.outDir = pop<string>(rawOptions, "outDir");
+      if (rawOptions.plugins) {
+        options.plugins = rawOptions.plugins;
+      }
+      rawOptions.plugins = [];
+      options.options = rawOptions;
+
+      options.filepath = configPath;
+    }
+    else {
+      options = DefaultOptions;
+    }
+
+    if ((<any>options.options).paths) {
+      let basepath = Path.dirname(path);
+      for (let i = 0; i < (<any>options.options).paths.length; i++) {
+        if (!Path.isAbsolute((<any>options.options).paths[i])) {
+          (<any>options.options).paths[i] = Path.resolve(basepath, (<any>options.options).paths[i]);
+        }
+      }
+    }
+
+    return options;
+  }
+
   /**
    * TranscodeLess options
    */
   export class Options {
 
-    public static getOptionForLessFile(path: string): Options {
-      if (Fs.statSync(path).isFile()) {
-        path = Path.dirname(path);
-      }
-
-      var configPath: string;
-      do {
-        configPath = Path.join(path, "lessconfig.json");
-        path = Path.dirname(path);
-      } while (!Fs.existsSync(configPath) && atom.project.contains(path));
-
-      var options: Options;
-      if (Fs.existsSync(configPath)) {
-        var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
-        options = new Options();
-
-        if (rawOptions.outDir) {
-          options.outDir = rawOptions.outDir;
-          delete rawOptions.outDir;
-        }
-        if (rawOptions.plugins) {
-          options.plugins = rawOptions.plugins;
-        }
-        rawOptions.plugins = [];
-        options.options = rawOptions;
-
-        options.filepath = configPath;
-      }
-      else {
-        options = DefaultOptions;
-      }
-
-      if ((<any>options.options).paths) {
-        let basepath = Path.dirname(path);
-        for (let i = 0; i < (<any>options.options).paths.length; i++) {
-          if (!Path.isAbsolute((<any>options.options).paths[i])) {
-            (<any>options.options).paths[i] = Path.resolve(basepath, (<any>options.options).paths[i]);
-          }
-        }
-      }
-
-      return options;
-    }
-
     /** Path to this option file */
-    private filepath: string;
+    public filepath: string;
+
+    /** Root directory */
+    public rootDir: string;
 
     /** Directory in which css files with be created */
     public outDir: string;
