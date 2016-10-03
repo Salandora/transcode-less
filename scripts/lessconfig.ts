@@ -34,8 +34,19 @@ export module LessConfig {
       var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
       options = new Options();
 
-      options.rootDir = pop<string>(rawOptions, "rootDir");
-      options.outDir = pop<string>(rawOptions, "outDir");
+      options.rootDir = pop<string>(rawOptions, "rootDir", Path.dirname(configPath));
+      options.outDir = pop<string>(rawOptions, "outDir", Path.dirname(configPath));
+
+      // outDir resolution
+      if (!Path.isAbsolute(options.outDir)) {
+        options.outDir = Path.resolve(Path.dirname(configPath), options.outDir);
+      }
+
+      // rootDir resolution
+      if (!Path.isAbsolute(options.rootDir)) {
+        options.rootDir = Path.resolve(Path.dirname(configPath), options.rootDir);
+      }
+
       if (rawOptions.plugins) {
         options.plugins = rawOptions.plugins;
       }
@@ -114,13 +125,6 @@ export module LessConfig {
     public loadOptions(): Promise<Less.Options> {
       return new Promise<Less.Options>((resolve: (value?: Less.Options) => void, reject: (reason?: any) => void) => {
         let options: Less.Options = this.options;
-
-        let basepath = Path.dirname(this.filepath);
-        if (this.outDir) {
-          if (!Path.isAbsolute(this.outDir)) {
-            this.outDir = Path.resolve(basepath, this.outDir);
-          }
-        }
 
         let plugins: string[] = [];
         for (let plugin in this.plugins) {

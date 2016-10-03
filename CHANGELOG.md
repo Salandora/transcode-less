@@ -1,8 +1,16 @@
 ## Unreleased
+###Added
+ * Keep input file hierarchy
+ 
+### Fixed
+ * Bug with output directory creation
+
+## [0.2.4] - 2016-09-22
+### Added
+ * "Transcode all" action
 ### Changed
  * `README` updates
  * `package.json` updates
- * "Transcode all" action
 
 ## [0.2.2 - 0.2.3] - 2016-09-20
 ### Changed

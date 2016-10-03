@@ -11,7 +11,7 @@ function mkdir(dirpath: string): boolean {
   let path: string = dirpath;
 
   while (atom.project.contains(Path.dirname(path))) {
-    parts.push(Path.basename(path));
+    parts.unshift(Path.basename(path));
     path = Path.dirname(path);
   }
 
@@ -65,15 +65,13 @@ export function transcodeFile(filepath: string, configuration: LessConfig.Option
       configuration = LessConfig.getOptionForLessFile(filepath);
     }
 
-    let outDir = Path.dirname(filepath);
-    outDir = Path.relative(filepath, configuration.rootDir);
-    if (configuration.outDir) {
-      outDir = configuration.outDir;
-    }
-    let cssFile = Path.join(outDir, Path.basename(filepath).replace(/\.less$/, ".css"));
-    let mapFile = Path.join(outDir, Path.basename(filepath).replace(/\.less$/, ".css.map"));
+    let outBasefile = Path.relative(configuration.rootDir, filepath);
+    outBasefile = Path.resolve(configuration.outDir, outBasefile);
 
-    if (!mkdir(outDir)) {
+    let cssFile = outBasefile.replace(/\.less$/, ".css");
+    let mapFile = outBasefile.replace(/\.less$/, ".css.map");
+
+    if (!mkdir(Path.dirname(outBasefile))) {
       reject(<DetailedError>{
         name: "TL:MKDIR",
         message: "Out directory cannot be create",
@@ -162,8 +160,6 @@ export function transcodeAll(configuration: LessConfig.Options = undefined): Pro
         }
       });
     } while (paths.length > 0);
-
-    console.log("files ", files);
 
     if (files.length > 0) {
       // The first file is transcoded alone, in case of plugin should be installed

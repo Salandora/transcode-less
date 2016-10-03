@@ -1,7 +1,5 @@
 import Transcoder = require("./transcoder");
 
-import {DetailedError} from "./error";
-
 /**
  * Serialized state
  */
