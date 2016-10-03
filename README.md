@@ -39,15 +39,15 @@ Options:
       "rootDir": "./less",
       "outDir": "../www/styles"
    }
-   // /path/to/src/less/file.less => /path/to/www/styles/file.less
-   // /path/to/src/less/theme/file.less => /path/to/www/styles/theme/file.less
+   // /path/to/src/less/file.less => /path/to/www/styles/file.css
+   // /path/to/src/less/theme/file.less => /path/to/www/styles/theme/file.css
    ```
    > ```json
    {
       "outDir": "../www"
    }
-   // /path/to/src/styles/file.less => /path/to/www/styles/file.less
-   // /path/to/src/styles/theme/file.less => /path/to/www/styles/theme/file.less
+   // /path/to/src/styles/file.less => /path/to/www/styles/file.css
+   // /path/to/src/styles/theme/file.less => /path/to/www/styles/theme/file.css
    ```
 
 
@@ -81,5 +81,4 @@ Options:
 
 ## Todo
 
- * Find a way to define an output directory keeping source hierarchy
  * Specify excluded directories and/or files (resp. included)
