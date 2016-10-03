@@ -1,8 +1,17 @@
 ## Unreleased
 
+## [0.2.5] - 2016-10-03
+### Added
+ * New option *rootDir* in `lessconfig.json`
+ * Maintain hierarchy for output files
+
+### Fixed
+ * Bug with output directory creation
+
 ## [0.2.4] - 2016-09-22
 ### Added
  * "Transcode all" action
+
 ### Changed
  * `README` updates
  * `package.json` updates

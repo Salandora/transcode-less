@@ -29,18 +29,40 @@ less IDE plugin transcoder.
 
 Options:
 
- * outDir (string)[optional]
+ * *rootDir* (string)[optional]
+   > Used to resolve output file path.
+   > The path of the input less file is relativized using this options
+   > and then made absolute using the *outDir* option.
+   > Ex:
+   > ```json
+   {
+      "rootDir": "./less",
+      "outDir": "../www/styles"
+   }
+   // /path/to/src/less/file.less => /path/to/www/styles/file.less
+   // /path/to/src/less/theme/file.less => /path/to/www/styles/theme/file.less
+   ```
+   > ```json
+   {
+      "outDir": "../www"
+   }
+   // /path/to/src/styles/file.less => /path/to/www/styles/file.less
+   // /path/to/src/styles/theme/file.less => /path/to/www/styles/theme/file.less
+   ```
+
+
+ * *outDir* (string)[optional]
    > Define the output directory for transcoded files. If not set, css file will
    > be create in the same folder of the less source file.
    > Relative path are resolved from the *lessconfig.json* file location.
 
- * paths (string[])[optional]
+ * *paths* (string[])[optional]
    > List of include paths for less rendering. More about it on
    > [lesscss.org](http://lesscss.org/usage/#command-line-usage-include-paths).
    > The main difference with the orignal option is that the transcoded file
    > location is automatically added if empty.
 
- * plugins (object)[optional]
+ * *plugins* (object)[optional]
    > Extra less plugin configuration.
    >
    > Ex:
@@ -54,7 +76,7 @@ Options:
    }
    ```
 
- * any other lesscss options (except for plugins)
+ * Any other lesscss options (except for plugins)
    > See [lesscss doc](http://lesscss.org/usage/#command-line-usage-options)
 
 ## Todo
