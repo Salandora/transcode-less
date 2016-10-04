@@ -3,47 +3,7 @@ import Less = require("less");
 import Path = require("path");
 
 import {LessConfig} from "./lessconfig";
-
-/** Create `dirpath` recursively */
-function mkdir(dirpath: string): boolean {
-
-  let parts: string[] = [];
-  let path: string = dirpath;
-
-  while (atom.project.contains(Path.dirname(path))) {
-    parts.unshift(Path.basename(path));
-    path = Path.dirname(path);
-  }
-
-  parts.forEach(part => {
-    path = Path.join(path, part);
-    try {
-      Fs.accessSync(path, Fs.F_OK);
-    }
-    catch (exception) {
-      Fs.mkdirSync(path);
-    }
-  });
-
-  try {
-    return Fs.statSync(path).isDirectory();
-  }
-  catch (exception) {
-    return false;
-  }
-}
-
-/** Relativize absolute path from project path */
-function getRelativeFilePath(filepath: string): string {
-  if (!Path.isAbsolute(filepath)) {
-    return filepath;
-  }
-  let relativeFilepath = Path.dirname(filepath);
-  while (atom.project.contains(Path.dirname(relativeFilepath))) {
-    relativeFilepath = Path.dirname(relativeFilepath);
-  }
-  return Path.relative(relativeFilepath, filepath);
-}
+import {UtilPath} from "./util-path";
 
 /** Render less from the given css string */
 function render(filepath: string, input: string, configuration: LessConfig.Options): Promise<Less.RenderOutput> {
@@ -71,15 +31,8 @@ export function transcodeFile(filepath: string, configuration: LessConfig.Option
     let cssFile = outBasefile.replace(/\.less$/, ".css");
     let mapFile = outBasefile.replace(/\.less$/, ".css.map");
 
-    if (!mkdir(Path.dirname(outBasefile))) {
-      reject(<DetailedError>{
-        name: "TL:MKDIR",
-        message: "Out directory cannot be create",
-        detail: `directory: ${getRelativeFilePath(filepath)}`,
-        stack: "transcoder.ts:71"
-      });
-    }
-    else {
+    try {
+      UtilPath.mkdirSync(Path.dirname(outBasefile));
       // Read less file content
       Fs.readFile(filepath, (error: NodeJS.ErrnoException, data: Buffer) => {
         if (error) {
@@ -87,7 +40,7 @@ export function transcodeFile(filepath: string, configuration: LessConfig.Option
           reject(<DetailedError>{
             name: "TL:READFL",
             message: error.message,
-            detail: `cannot read file: ${getRelativeFilePath(filepath)}`,
+            detail: `cannot read file: ${UtilPath.getRelativeFilePath(filepath)}`,
             stack: error.stack
           });
         }
@@ -109,11 +62,19 @@ export function transcodeFile(filepath: string, configuration: LessConfig.Option
               reject(<DetailedError>{
                 name: "TL:PARSE",
                 message: error.message,
-                detail: `less rendering failed: ${getRelativeFilePath(filepath)}`,
+                detail: `less rendering failed: ${UtilPath.getRelativeFilePath(filepath)}`,
                 stack: `${error.filename}:${error.line} ${error.type}`
               });
             });
         }
+      });
+    }
+    catch (error) {
+      reject(<DetailedError>{
+        name: "TL:MKDIR",
+        message: "Out directory cannot be create",
+        detail: `directory: ${UtilPath.getRelativeFilePath(filepath)}`,
+        stack: "transcoder.ts:71"
       });
     }
   });

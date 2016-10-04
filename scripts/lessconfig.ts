@@ -1,7 +1,6 @@
 import Fs = require("fs");
 import Less = require("less");
 import Path = require("path");
-import NpmUtils = require("./npm-utils");
 
 export module LessConfig {
 
@@ -103,15 +102,30 @@ export module LessConfig {
     /** Add to `options` loaded plugins and return unloaded */
     private loadPlugins(options: Less.Options, plugins: string[]): string[] {
       let unavailablePlugins: string[] = [];
+      let nodeModulePaths: string[] = [];
+
+      (<any>atom.project).getPaths().forEach((item: string) => {
+        try {
+          let path = Path.join(item, "node_modules");
+          Fs.accessSync(path, Fs.F_OK);
+          nodeModulePaths.push(path);
+        }
+        catch(error) {}
+      });
+
       for (let index in plugins) {
         let name = plugins[index];
-        try {
-          let pluginClass = require(name);
-          let plugin = new pluginClass(this.plugins[name]);
-          options.plugins.push(plugin);
+        let loaded = false;
+        for (let p = 0; p < nodeModulePaths.length; p++) {
+          try {
+            let pluginClass = require(Path.join(nodeModulePaths[p], name));
+            let plugin = new pluginClass(this.plugins[name]);
+            options.plugins.push(plugin);
+            loaded = true;
+          }
+          catch (error) {}
         }
-        catch (error) {
-          console.error(error);
+        if (!loaded) {
           unavailablePlugins.push(name);
         }
       }
@@ -131,22 +145,15 @@ export module LessConfig {
           plugins.push(plugin);
         }
         let unavailablePlugins: string[] = this.loadPlugins(options, plugins);
-        if (unavailablePlugins.length > 0) {
-          atom.notifications.addInfo("Less plugin install", { detail: unavailablePlugins.join(", ") });
-          NpmUtils.install(unavailablePlugins)
-            .then(() => {
-              this.loadPlugins(options, unavailablePlugins);
-              resolve(options);
-            })
-            .catch(() => {
-              unavailablePlugins = this.loadPlugins(options, unavailablePlugins);
-              atom.notifications.addWarning(unavailablePlugins.join(", ") + " are not available", { dismissable: true });
-              resolve(options);
-            });
+
+        if (unavailablePlugins.length == 1) {
+          atom.notifications.addWarning(unavailablePlugins[0] + " is not installed", { dismissable: true });
         }
-        else {
-          resolve(options);
+        else if (unavailablePlugins.length > 1) {
+          atom.notifications.addWarning(unavailablePlugins.join(", ") + " are not installed", { dismissable: true });
         }
+
+        resolve(options);
       });
     }
   }

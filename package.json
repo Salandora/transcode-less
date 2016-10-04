@@ -21,6 +21,6 @@
   "devDependencies": {
     "event-kit": "*",
     "less": "*",
-    "npm": "*"
+    "typings": "*"
   }
 }
