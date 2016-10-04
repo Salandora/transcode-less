@@ -1,5 +1,9 @@
 ## Unreleased
 
+## [0.3.0] - 2016-10-04
+### Removed
+ * [npm](https://www.npmjs.com/package/npm) dependency
+
 ## [0.2.5 - 0.2.6] - 2016-10-03
 ### Added
  * New option *rootDir* in `lessconfig.json`
