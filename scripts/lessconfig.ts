@@ -17,17 +17,7 @@ export module LessConfig {
     return otherwise;
   }
 
-  export function getOptionForLessFile(path: string): Options {
-    if (Fs.statSync(path).isFile()) {
-      path = Path.dirname(path);
-    }
-
-    var configPath: string;
-    do {
-      configPath = Path.join(path, "lessconfig.json");
-      path = Path.dirname(path);
-    } while (!Fs.existsSync(configPath) && atom.project.contains(path));
-
+  export function getOptionForLessFile(configPath: string): Options {
     var options: Options;
     if (Fs.existsSync(configPath)) {
       var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
@@ -46,6 +36,14 @@ export module LessConfig {
         options.rootDir = Path.resolve(Path.dirname(configPath), options.rootDir);
       }
 
+      if (rawOptions.paths) {
+        for (let p = rawOptions.paths.length - 1; p >= 0; p--) {
+          if (!Path.isAbsolute(rawOptions.paths[p])) {
+            rawOptions.paths[p] = Path.resolve(options.rootDir, rawOptions.paths[p]);
+          }
+        }
+      }
+
       if (rawOptions.plugins) {
         options.plugins = rawOptions.plugins;
       }
@@ -56,15 +54,6 @@ export module LessConfig {
     }
     else {
       options = DefaultOptions;
-    }
-
-    if ((<any>options.options).paths) {
-      let basepath = Path.dirname(path);
-      for (let i = 0; i < (<any>options.options).paths.length; i++) {
-        if (!Path.isAbsolute((<any>options.options).paths[i])) {
-          (<any>options.options).paths[i] = Path.resolve(basepath, (<any>options.options).paths[i]);
-        }
-      }
     }
 
     return options;

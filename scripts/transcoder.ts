@@ -22,7 +22,12 @@ function render(filepath: string, input: string, configuration: LessConfig.Optio
 export function transcodeFile(filepath: string, configuration: LessConfig.Options = undefined): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     if (configuration == undefined) {
-      configuration = LessConfig.getOptionForLessFile(filepath);
+      let configFile = UtilPath.findConfigFileForPathSync(filepath);
+      configuration = LessConfig.getOptionForLessFile(configFile);
+    }
+
+    if (!configuration.options["path"]) {
+      configuration.options["path"] = [ Path.dirname(filepath) ];
     }
 
     let outBasefile = Path.relative(configuration.rootDir, filepath);

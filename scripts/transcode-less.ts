@@ -15,6 +15,7 @@ function observe(editor: AtomCore.IEditor) {
       })
       .catch((error: DetailedError) => {
         atom.notifications.addError(error.message, { detail: error.detail });
+        console.error(error);
       });
   });
   editor.onDidDestroy(() => { disposable.dispose(); });
@@ -41,6 +42,7 @@ export function activate(state: State) {
         })
         .catch((error: DetailedError) => {
           atom.notifications.addError(error.message, { detail: error.detail });
+          console.error(error);
         });
     }
   });

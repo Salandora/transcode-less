@@ -1,6 +1,9 @@
 ## Unreleased
+
+## [0.3.0 - 0.3.1] - 2016-10-05
 ### Removed
  * [npm](https://www.npmjs.com/package/npm) dependency
+ * Source code improvements
 
 ## [0.2.5 - 0.2.6] - 2016-10-03
 ### Added
