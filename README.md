@@ -96,4 +96,6 @@ Options:
 
 ## Todo
 
+ * Optimize *rootDir* option to get a good default value
  * Specify excluded directories and/or files (resp. included)
+ * Fix issue with Windows links (MKLINK /D ou /J) between drives (open a project at `C:\Users\johndoe\path\to\project`, file paths will be resolve as `D:\real\path\to\project\path\to\file.ext`)
