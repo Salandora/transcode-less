@@ -1,9 +1,14 @@
 ## Unreleased
 
-## [0.3.0 - 0.3.1] - 2016-10-05
+## [0.3.1 - 0.3.2] - 2016-10-06
+### Fixed
+ * Failed to find `lessconfig.json` when located in root directory with a link in the project path
+### Changed
+ * Source code improvement
+
+## [0.3.0] - 2016-10-04
 ### Removed
  * [npm](https://www.npmjs.com/package/npm) dependency
- * Source code improvements
 
 ## [0.2.5 - 0.2.6] - 2016-10-03
 ### Added

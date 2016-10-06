@@ -58,7 +58,7 @@ export module UtilPath {
       path = Path.dirname(path);
     }
 
-    while (filepath == undefined && atom.project.contains(path)) {
+    while (filepath == undefined && atom.project.contains(Path.join(path, Path.sep))) {
       try {
         Fs.accessSync(Path.join(path, "lessconfig.json"), Fs.F_OK);
         filepath = Path.join(path, "lessconfig.json");
@@ -86,7 +86,7 @@ export module UtilPath {
       return filepath;
     }
     let relativeFilepath = Path.dirname(filepath);
-    while (atom.project.contains(Path.dirname(relativeFilepath))) {
+    while (atom.project.contains(Path.join(Path.dirname(relativeFilepath), Path.sep))) {
       relativeFilepath = Path.dirname(relativeFilepath);
     }
     return Path.relative(relativeFilepath, filepath);
