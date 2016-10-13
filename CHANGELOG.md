@@ -1,4 +1,6 @@
 ## Unreleased
+
+## [0.3.3] - 2016-10-13
 ### Changed
  * *rootDir* resolution improvement
 
