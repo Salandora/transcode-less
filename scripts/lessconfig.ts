@@ -23,21 +23,21 @@ export module LessConfig {
    * Returns transcode-less options of given `lessconfig.josn` path
    */
   export function getOptionForLessFile(configPath: string): Options {
-    var options: Options;
+    var configuration: Options;
     if (Fs.existsSync(configPath)) {
       var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
-      options = new Options();
+      configuration = new Options();
 
-      options.rootDir = pop<string>(rawOptions, "rootDir");
-      options.outDir = pop<string>(rawOptions, "outDir", Path.dirname(configPath));
+      configuration.outDir = pop<string>(rawOptions, "outDir", Path.dirname(configPath));
+      configuration.rootDir = pop<string>(rawOptions, "rootDir");
 
       // outDir resolution
-      if (!Path.isAbsolute(options.outDir)) {
-        options.outDir = Path.resolve(Path.dirname(configPath), options.outDir);
+      if (!Path.isAbsolute(configuration.outDir)) {
+        configuration.outDir = Path.resolve(Path.dirname(configPath), configuration.outDir);
       }
 
       // rootDir resolution
-      if (!options.rootDir) {
+      if (!configuration.rootDir) {
         let rootDir = Path.dirname(configPath);
         let depth = UtilPath.getMinDepthOfLessFiles(rootDir);
         let paths = [Path.dirname(configPath)];
@@ -46,13 +46,11 @@ export module LessConfig {
         while (paths.length == 1 && depths[0] > 0) {
           rootDir = paths.pop();
           depth = depths.pop();
-          console.log(`rootDir: ${rootDir}#${depth}`);
           Fs.readdirSync(rootDir).forEach(path => {
             if (path[0] != "." && path != "node_modules" && Fs.statSync(Path.join(rootDir, path)).isDirectory()) {
               path = Path.join(rootDir, path);
               depth = UtilPath.getMinDepthOfLessFiles(path);
               if (depth >= 0) {
-                console.log(`append: ${path}#${depth}`);
                 paths.push(path);
                 depths.push(depth);
               }
@@ -60,33 +58,33 @@ export module LessConfig {
           });
         }
 
-        options.rootDir = paths.pop();
+        configuration.rootDir = paths.pop();
       }
-      else if (!Path.isAbsolute(options.rootDir)) {
-        options.rootDir = Path.resolve(Path.dirname(configPath), options.rootDir);
+      else if (!Path.isAbsolute(configuration.rootDir)) {
+        configuration.rootDir = Path.resolve(Path.dirname(configPath), configuration.rootDir);
       }
 
       if (rawOptions.paths) {
         for (let p = rawOptions.paths.length - 1; p >= 0; p--) {
           if (!Path.isAbsolute(rawOptions.paths[p])) {
-            rawOptions.paths[p] = Path.resolve(options.rootDir, rawOptions.paths[p]);
+            rawOptions.paths[p] = Path.resolve(configuration.rootDir, rawOptions.paths[p]);
           }
         }
       }
 
       if (rawOptions.plugins) {
-        options.plugins = rawOptions.plugins;
+        configuration.plugins = pop(rawOptions, "plugins", []);
       }
       rawOptions.plugins = [];
-      options.options = rawOptions;
 
-      options.filepath = configPath;
+      configuration.options = rawOptions;
+      configuration.filepath = configPath;
     }
     else {
-      options = DefaultOptions;
+      configuration = DefaultOptions;
     }
 
-    return options;
+    return configuration;
   }
 
   /**
@@ -142,7 +140,9 @@ export module LessConfig {
             options.plugins.push(plugin);
             loaded = true;
           }
-          catch (error) {}
+          catch (error) {
+            console.error(error);
+          }
         }
         if (!loaded) {
           unavailablePlugins.push(name);

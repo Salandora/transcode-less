@@ -6,7 +6,9 @@ import Transcoder = require("./transcoder");
 interface State {
 }
 
-/** Add observer on TextEditor */
+/**
+ * Add observer on TextEditor
+ */
 function observe(editor: AtomCore.IEditor) {
   let disposable = editor.onDidSave(event => {
     Transcoder.transcodeFile(editor.getPath())
@@ -23,7 +25,9 @@ function observe(editor: AtomCore.IEditor) {
 
 let globalObserver: AtomCore.Disposable;
 
-/** Called when the package is activated */
+/**
+ * Called when the package is activated
+ */
 export function activate(state: State) {
   // Add global observer
   globalObserver = atom.workspace.observeTextEditors((editor: AtomCore.IEditor) => {
@@ -48,12 +52,16 @@ export function activate(state: State) {
   });
 }
 
-/** Called when the package is deactivated */
+/**
+ * Called when the package is deactivated
+ */
 export function deactivate() {
   globalObserver.dispose();
 }
 
-/** Called when the package's state is saved */
+/**
+  * Called when the package's state is saved
+  */
 export function serialize(): State {
   var state = {
   }

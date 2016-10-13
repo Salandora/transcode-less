@@ -5,7 +5,9 @@ import Path = require("path");
 import {LessConfig} from "./lessconfig";
 import {UtilPath} from "./util-path";
 
-/** Render less from the given css string */
+/**
+ * Render less from the given css string
+ */
 function render(filepath: string, input: string, configuration: LessConfig.Options): Promise<Less.RenderOutput> {
   return new Promise<Less.RenderOutput> ((resolve, reject) => {
   configuration.loadOptions()
@@ -18,7 +20,9 @@ function render(filepath: string, input: string, configuration: LessConfig.Optio
   });
 }
 
-/** Transcode less file into css file */
+/**
+ * Transcode less file into css file
+ */
 export function transcodeFile(filepath: string, configuration: LessConfig.Options = undefined): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     if (configuration == undefined) {
@@ -85,7 +89,9 @@ export function transcodeFile(filepath: string, configuration: LessConfig.Option
   });
 }
 
-/** Transcode all less files in the project */
+/**
+ * Transcode all less files in the project
+ */
 export function transcodeAll(configuration: LessConfig.Options = undefined): Promise<string> {
   return new Promise<string>((resolve, reject) => {
 
