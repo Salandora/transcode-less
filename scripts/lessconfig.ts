@@ -17,6 +17,9 @@ export module LessConfig {
     return otherwise;
   }
 
+  /**
+   * Returns transcode-less options of given `lessconfig.josn` path
+   */
   export function getOptionForLessFile(configPath: string): Options {
     var options: Options;
     if (Fs.existsSync(configPath)) {
@@ -88,7 +91,9 @@ export module LessConfig {
       return this.filepath;
     }
 
-    /** Add to `options` loaded plugins and return unloaded */
+    /**
+     * Add to `options` loaded plugins and return unloaded
+     */
     private loadPlugins(options: Less.Options, plugins: string[]): string[] {
       let unavailablePlugins: string[] = [];
       let nodeModulePaths: string[] = [];

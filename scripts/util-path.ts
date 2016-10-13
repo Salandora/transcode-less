@@ -3,7 +3,124 @@ let Path = require("path");
 
 export module UtilPath {
 
-  /** Creates directory recursively */
+  /**
+   * Test if a path is contained in atom projects paths
+   */
+  /*private*/ function containsInAtomProject(path: string): boolean {
+    return atom.project.contains(Path.join(path, Path.sep));
+  }
+
+  /**
+   * Return the minimal depth for less file starting from the given path
+   */
+  /*private*/ function getLessFileMinDepth(path: string): number {
+    let depth: number = -1;
+    let nextPaths: string[] = [path];
+    let paths: string[];
+    let files: string[];
+
+    let currentPath: string;
+
+    while (nextPaths.length > 0) {
+      depth++;
+      paths = nextPaths;
+      nextPaths = [];
+      while (paths.length > 0) {
+        currentPath = paths.pop();
+        files = Fs.readdirSync(currentPath);
+
+        for (let f = 0; f < files.length; f++) {
+          if (Path.extname(files[f]) == ".less") {
+            return depth;
+          }
+          else if (Fs.statSync(Path.join(currentPath, files[f]).isDirectory())) {
+            nextPaths.push(Path.join(currentPath, files[f]));
+          }
+        }
+      }
+    }
+
+    return -1;
+  }
+
+  /**
+   * Test if a file exists
+   */
+  export function fileExists(path: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      try {
+        resolve(fileExistsSync(path));
+      }
+      catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Synchronous version of *fileExists()*
+   */
+  export function fileExistsSync(path: string): boolean {
+    try {
+      Fs.accessSync(path, Fs.F_OK);
+      return true;
+    }
+    catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Look up in folder hierarchy until `lessconfig.json` is found, or get out of the project directory.
+   */
+  export function findConfigFileForPath(path: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      try {
+        resolve(findConfigFileForPathSync(path));
+      }
+      catch(error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Synchronous version of *findConfigFileForPath()*
+   */
+  export function findConfigFileForPathSync(path: string): string {
+    let filepath: string = undefined;
+
+    if (Fs.statSync(path).isFile()) {
+      path = Path.dirname(path);
+    }
+
+    while (filepath == undefined && containsInAtomProject(path)) {
+      if (fileExistsSync(Path.join(path, "lessconfig.json"))) {
+        filepath = Path.join(path, "lessconfig.json");
+      }
+      path = Path.dirname(path);
+    }
+
+    return filepath;
+  }
+
+  /**
+   * Relativize absolute path from project path
+   */
+  export function getRelativeFilePath(filepath: string): string {
+    if (!Path.isAbsolute(filepath)) {
+      return filepath;
+    }
+    let relativeFilepath = Path.dirname(filepath);
+    while (containsInAtomProject(Path.dirname(relativeFilepath))) {
+      relativeFilepath = Path.dirname(relativeFilepath);
+    }
+    return Path.relative(relativeFilepath, filepath);
+  }
+
+  /**
+   * Creates directory recursively
+   */
   export function mkdir(path: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
@@ -16,79 +133,20 @@ export module UtilPath {
     });
   }
 
-  /** Synchronous version of *mkdir()* */
+  /**
+   * Synchronous version of *mkdir()*
+   */
   export function mkdirSync(path: string): void {
     let paths: string[] = [];
-    let stop: boolean = false;
 
-    while (!stop) {
-      try {
-        Fs.accessSync(path, Fs.F_OK);
-        stop = true;
-      }
-      catch (error) {
-        paths.push(Path.basename(path));
-        path = Path.dirname(path);
-      }
+    while (!fileExistsSync(path)) {
+      paths.push(Path.basename(path));
+      path = Path.dirname(path);
     }
 
     while (paths.length > 0) {
       path = Path.join(path, paths.pop());
       Fs.mkdirSync(path);
     }
-  }
-
-  /** Look up in folder hierarchy until `lessconfig.json` is found, or get out of the project directory. */
-  export function findConfigFileForPath(path: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      try {
-        resolve(findConfigFileForPathSync(path));
-      }
-      catch(error) {
-        reject(error);
-      }
-    });
-  }
-
-  /** Synchronous version of *findConfigFileForPath()* */
-  export function findConfigFileForPathSync(path: string): string {
-    let filepath: string = undefined;
-
-    if (Fs.statSync(path).isFile()) {
-      path = Path.dirname(path);
-    }
-
-    while (filepath == undefined && atom.project.contains(path)) {
-      try {
-        Fs.accessSync(Path.join(path, "lessconfig.json"), Fs.F_OK);
-        filepath = Path.join(path, "lessconfig.json");
-      }
-      catch (error) {
-        path = Path.dirname(path);
-      }
-    }
-
-    if (filepath == undefined && (<any>atom.project).getPaths().indexOf(path) > -1) {
-      try {
-        Fs.accessSync(Path.join(path, "lessconfig.json"), Fs.F_OK);
-        filepath = Path.join(path, "lessconfig.json");
-      }
-      catch (error) {
-      }
-    }
-
-    return filepath;
-  }
-
-  /** Relativize absolute path from project path */
-  export function getRelativeFilePath(filepath: string): string {
-    if (!Path.isAbsolute(filepath)) {
-      return filepath;
-    }
-    let relativeFilepath = Path.dirname(filepath);
-    while (atom.project.contains(Path.dirname(relativeFilepath))) {
-      relativeFilepath = Path.dirname(relativeFilepath);
-    }
-    return Path.relative(relativeFilepath, filepath);
   }
 }
