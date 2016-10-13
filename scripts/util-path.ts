@@ -111,6 +111,7 @@ export module UtilPath {
     if (!Path.isAbsolute(filepath)) {
       return filepath;
     }
+    
     let relativeFilepath = Path.dirname(filepath);
     while (containsInAtomProject(Path.dirname(relativeFilepath))) {
       relativeFilepath = Path.dirname(relativeFilepath);
