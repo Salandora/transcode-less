@@ -36,24 +36,52 @@ Options:
    > The path of the input less file is relativized using this options
    > and then made absolute using the *outDir* option.
    >
+   > By default *rootDir* is the deepest directory which contains every less files, starting from the `lessconfig.json` file.
+   >
    > Ex:
-   > > ```json
-   {
-     "rootDir": "./less",
-     "outDir": "../www/styles"
-   }
+   > > ```txt
+   Project
+   |- src
+   |  |- scripts
+   |  |  |- project.js
+   |  |  \ ...
+   |  \- styles
+   |     |- project.less
+   |     \ ...
+   |- lessconfig.json
+   \- ...
    ```
-   > > /path/to/src/less/file.less -> /path/to/www/styles/file.css
-   > > /path/to/src/less/theme/file.less -> /path/to/www/styles/theme/file.css
+   > > Default *rootDir* will be `Project/src/styles`
+   >
+   > Ex:
+   > > ```txt
+   Project
+   |- src
+   |  |- scripts
+   |  |  |- project.js
+   |  |  \ ...
+   |  |- styles
+   |  |  |- project.less
+   |  |  \ ...
+   |  \- theme
+   |     |- light.less
+   |     \ ...
+   |- lessconfig.json
+   \- ...
+   ```
+   > > Default *rootDir* will be `Project/src`
+   >
+   > Ex:
+   > > With *rootDir* as `.../Project/src/less` and *outDir* as `.../Project/www/css`, we get
+   > >
+   > > .../Project/src/less/file.less -> .../Project/www/css/file.css
+   >
+   > > .../Project/src/less/theme/file.less -> .../Project/www/css/theme/file.css
 
    > Ex:
-   > > ```json
-   {
-     "outDir": "../www"
-   }
-   ```
-   > > /path/to/src/styles/file.less -> /path/to/www/styles/file.css
-   > > /path/to/src/styles/theme/file.less -> /path/to/www/styles/theme/file.css
+   > > With *rootDir* as `.../Project/src` and *outDir* as `.../Project/www/css`, we get
+   > >
+   > > .../Project/src/styles/file.less -> .../Project/www/css/styles/file.css
 
  * *outDir* (string)[optional]
    > Define the output directory for transcoded files. If not set, css file will
@@ -96,5 +124,4 @@ Options:
 
 ## Todo
 
- * Optimize *rootDir* option to get a good default value
  * Specify excluded directories and/or files (resp. included)
