@@ -2,6 +2,8 @@ import Fs = require("fs");
 import Less = require("less");
 import Path = require("path");
 
+import {UtilPath} from "./util-path";
+
 export module LessConfig {
 
   interface ILessPlugin {
@@ -26,7 +28,7 @@ export module LessConfig {
       var rawOptions: any = JSON.parse(Fs.readFileSync(configPath).toString());
       options = new Options();
 
-      options.rootDir = pop<string>(rawOptions, "rootDir", Path.dirname(configPath));
+      options.rootDir = pop<string>(rawOptions, "rootDir");
       options.outDir = pop<string>(rawOptions, "outDir", Path.dirname(configPath));
 
       // outDir resolution
@@ -35,7 +37,32 @@ export module LessConfig {
       }
 
       // rootDir resolution
-      if (!Path.isAbsolute(options.rootDir)) {
+      if (!options.rootDir) {
+        let rootDir = Path.dirname(configPath);
+        let depth = UtilPath.getMinDepthOfLessFiles(rootDir);
+        let paths = [Path.dirname(configPath)];
+        let depths = [depth];
+
+        while (paths.length == 1 && depths[0] > 0) {
+          rootDir = paths.pop();
+          depth = depths.pop();
+          console.log(`rootDir: ${rootDir}#${depth}`);
+          Fs.readdirSync(rootDir).forEach(path => {
+            if (path[0] != "." && path != "node_modules" && Fs.statSync(Path.join(rootDir, path)).isDirectory()) {
+              path = Path.join(rootDir, path);
+              depth = UtilPath.getMinDepthOfLessFiles(path);
+              if (depth >= 0) {
+                console.log(`append: ${path}#${depth}`);
+                paths.push(path);
+                depths.push(depth);
+              }
+            }
+          });
+        }
+
+        options.rootDir = paths.pop();
+      }
+      else if (!Path.isAbsolute(options.rootDir)) {
         options.rootDir = Path.resolve(Path.dirname(configPath), options.rootDir);
       }
 
@@ -99,12 +126,10 @@ export module LessConfig {
       let nodeModulePaths: string[] = [];
 
       (<any>atom.project).getPaths().forEach((item: string) => {
-        try {
-          let path = Path.join(item, "node_modules");
-          Fs.accessSync(path, Fs.F_OK);
+        let path = Path.join(item, "node_modules");
+        if (UtilPath.existsSync(path)) {
           nodeModulePaths.push(path);
         }
-        catch(error) {}
       });
 
       for (let index in plugins) {

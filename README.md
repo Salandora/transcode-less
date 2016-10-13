@@ -96,5 +96,4 @@ Options:
 
 ## Todo
 
- * Optimize *rootDir* option to get a good default value
  * Specify excluded directories and/or files (resp. included)

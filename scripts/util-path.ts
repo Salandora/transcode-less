@@ -46,10 +46,10 @@ export module UtilPath {
   /**
    * Test if a file exists
    */
-  export function fileExists(path: string): Promise<boolean> {
+  export function exists(path: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       try {
-        resolve(fileExistsSync(path));
+        resolve(existsSync(path));
       }
       catch (error) {
         reject(error);
@@ -60,7 +60,7 @@ export module UtilPath {
   /**
    * Synchronous version of *fileExists()*
    */
-  export function fileExistsSync(path: string): boolean {
+  export function existsSync(path: string): boolean {
     try {
       Fs.accessSync(path, Fs.F_OK);
       return true;
@@ -95,7 +95,7 @@ export module UtilPath {
     }
 
     while (filepath == undefined && containsInAtomProject(path)) {
-      if (fileExistsSync(Path.join(path, "lessconfig.json"))) {
+      if (existsSync(Path.join(path, "lessconfig.json"))) {
         filepath = Path.join(path, "lessconfig.json");
       }
       path = Path.dirname(path);
@@ -105,13 +105,43 @@ export module UtilPath {
   }
 
   /**
+   * Return the min depth for less files, from the given path.
+   */
+  export function getMinDepthOfLessFiles(path: string): number {
+    let nextPaths: string[] = [path];
+    let depth = -1;
+
+    let paths: string[], files: string[], currentPath: string;
+
+    while (nextPaths.length > 0) {
+      paths = nextPaths;
+      nextPaths = [];
+      depth++;
+      do {
+        currentPath = paths.pop();
+        files = Fs.readdirSync(currentPath);
+        for (let f = files.length - 1; f >= 0; f--) {
+          if (Fs.statSync(Path.join(currentPath, files[f])).isDirectory()) {
+            nextPaths.push(Path.join(currentPath, files[f]));
+          }
+          else if (Path.extname(files[f]) == ".less") {
+            return depth;
+          }
+        }
+      } while (paths.length > 0)
+    }
+
+    return -1;
+  }
+
+  /**
    * Relativize absolute path from project path
    */
   export function getRelativeFilePath(filepath: string): string {
     if (!Path.isAbsolute(filepath)) {
       return filepath;
     }
-    
+
     let relativeFilepath = Path.dirname(filepath);
     while (containsInAtomProject(Path.dirname(relativeFilepath))) {
       relativeFilepath = Path.dirname(relativeFilepath);
@@ -140,7 +170,7 @@ export module UtilPath {
   export function mkdirSync(path: string): void {
     let paths: string[] = [];
 
-    while (!fileExistsSync(path)) {
+    while (!existsSync(path)) {
       paths.push(Path.basename(path));
       path = Path.dirname(path);
     }
